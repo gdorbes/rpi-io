@@ -7,13 +7,13 @@
     "gpio",
     "nodejs"
   ],
-  "homepage": "https://github.com/gdorbes/rpio-io#readme",
+  "homepage": "https://github.com/gdorbes/rpi-io#readme",
   "bugs": {
-    "url": "https://github.com/gdorbes/rpio-io/issues"
+    "url": "https://github.com/gdorbes/rpi-io/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/gdorbes/rpio-io.git"
+    "url": "git+https://github.com/gdorbes/rpi-io.git"
   },
   "license": "ISC",
   "author": "Guillaume DORBES",
