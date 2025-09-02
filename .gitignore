@@ -1,0 +1,14 @@
+# macOS files
+.DS_Store
+
+# PHP Storm IDE settings
+.idea
+
+# Environment variables
+.env
+
+# Dependencies
+node_modules/
+
+# App config file
+/_archive/
