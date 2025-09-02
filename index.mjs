@@ -166,11 +166,11 @@ export const ioInfo = async chip => {
 
 /** ------------------------------------------------------------------
  * @function ioSet
- * @description gpioset
+ * @description See 'man gpioset'
  * @param {Number} pin
  * @param {Number} value
  * @param {Object} opt
- * @return {Promise}
+ * @return {Object}
  */
 const ioSet = async (pin, value, opt) => {
 
@@ -184,10 +184,10 @@ const ioSet = async (pin, value, opt) => {
 }
 /** ------------------------------------------------------------------
  * @function ioGet
- * @description gpioget
+ * @description See 'man gpioget'
  * @param {Number} pin
  * @param {Object} opt
- * @return {Promise}
+ * @return {Object}
  */
 const ioGet = async (pin, opt) => {
 
