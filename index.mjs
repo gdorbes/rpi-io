@@ -31,6 +31,7 @@ export const log = function () {
         console.log.apply(console, Array.prototype.concat.apply([now, "🔎"], arguments))
     }
 }
+
 /** ------------------------------------------------------------------
  * @function sleep
  * @description Wait before continuing
@@ -40,9 +41,10 @@ export const sleep = ms => {
     log("sleep", ms)
     return new Promise(resolve => setTimeout(resolve, ms));
 }
+
 /** ------------------------------------------------------------------
  * @function isRPi
- * @description Return hardware name
+ * @description Check RPI hardware
  * @return {Boolean}
  */
 export const isRPi = () => {
@@ -60,7 +62,7 @@ export const isRPi = () => {
  * @function exeShell
  * @description Async run command in Linux shell
  * @param {String} cmd
- * @return {Promise} {msg: 'ok', data: 'any result} or
+ * @return {Object} {msg: 'ok', data: 'any result} or
  *                  {msg: 'error message', data: 'any error'}
  */
 const exeShell = async cmd => {
@@ -92,7 +94,7 @@ const exeShell = async cmd => {
  * @description Async run executable file
  * @param {String} file
  * @param {Array} args
- * @return {Promise} {msg: 'ok', data: 'any result} or
+ * @return {Object} {msg: 'ok', data: 'any result} or
  *                  {msg: 'error message', data: 'any error'}
  */
 const exeFile = async (file, args) => {
@@ -118,29 +120,43 @@ const exeFile = async (file, args) => {
         }
     }
 }
+
 // -------------------------------------------------------------------
 // GPIO COMMANDS
 // See https://libgpiod.readthedocs.io/en/stable/gpio_tools.html
 /** ------------------------------------------------------------------
  * @function ioDetect
- * @description gpiodetect
- * * @return {Promise} {msg: 'ok', data: stdout} or
+ * @description See 'man gpiodetect'
+ *  @return {Object} {msg: 'ok', data: stdout} or
  *                     {msg: 'error message', data: 'any error'}
  */
-const ioDetect = async () => {
+export const ioDetect = async () => {
     const detect = await exeFile("gpiodetect")
     detect.msg === "ok" ? log("gpiodetect data:", detect.data) : log("gpiodetect error:", detect.msg, detect.data)
     return detect
 }
 
 /** ------------------------------------------------------------------
+ * @function ioVersion
+ * @description Libgpiod version
+ * @return {String}
+ */
+export const ioVersion = async () => {
+    const detected = await exeShell("gpiodetect -v")
+    if (detected.msg !== "ok")
+        return "undefined"
+    else
+        return detected.data.split("\n").shift().substring(22).trim()
+}
+
+/** ------------------------------------------------------------------
  * @function ioInfo
- * @description gpioinfo
+ * @description See 'man gpioinfo'
  * @param {String} chip - optional chip name
- * @return {Promise} {msg: 'ok', data: stdout} or
+ * @return {Object} {msg: 'ok', data: stdout} or
  *                   {msg: 'error message', data: 'any error'}
  */
-const ioInfo = async chip => {
+export const ioInfo = async chip => {
     let args = []
     chip ? args[0] = chip : false
     const info = await exeFile("gpioinfo", args)

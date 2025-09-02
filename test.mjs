@@ -1,6 +1,8 @@
 // -------------------------------------------------------------------
 // RPi GPIO CONTROL TEST SCRIPT
 // -------------------------------------------------------------------
-import {rioTest} from "./index.mjs"
+import {log, rioTest, ioVersion} from "./index.mjs"
 
-rioTest()
+log("libgpiod version:", await ioVersion())
+
+// rioTest()
