@@ -12,7 +12,7 @@
   - Input/Output - [libgpiod](https://libgpiod.readthedocs.io/en/stable/) v1.6.3 (*Bookworm*) and v2.2.1 (*Trixie*)
   - PWM - [sysfs](https://en.wikipedia.org/wiki/Sysfs) interface.
 
-## Installation
+## Installation 
 
 ````shell
 npm install rpi-io
