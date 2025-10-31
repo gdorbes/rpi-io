@@ -416,23 +416,14 @@ Rio.isSystemSupported() // See console below
 ```
 
 
-
-## Additional information 
-
-### Benchmark
+## Benchmark
 
 The following table summarizes GPIO *set* average times with rpi-io v1.1.0 and various hardwares and OS.
 
-|          | RPi 5B  | RPi 4B     | RPi Zero2   |
-| -------- | ------- | ---------- | ----------- |
-| Bookworm | 1.37 ms | 4.56 ms    | 9.07 ms     |
-| Trixie   | 3.82 ms | not tested | not tested. |
-
-
-
-### Keywords
-
-**raspberry pi rpi gpio pwm nodejs esm**
+|          | RPi 5B  | RPi 4B     | RPi Zero2  |
+| -------- | ------- | ---------- | ---------- |
+| Bookworm | 1.37 ms | 4.56 ms    | 9.07 ms    |
+| Trixie   | 3.82 ms | not tested | not tested |
 
 ---
 
