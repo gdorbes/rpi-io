@@ -161,13 +161,13 @@ import {Rio} from "rpi-io";
 const myOutput = new Rio(17, 'out');
 ```
 ##### Parameters
-- **gpio** *{Number}*  Must be one of the GPIO number as defined in [pinout.xyz](pinout.xyz). 
+- **gpio** *{Number}*  Must be one of the GPIO number as defined in [pinout.xyz](https://pinout.xyz). 
 - **type** *{String}* Must be one of the following values: 'in', 'out', 'pwm'.
 
 ##### Detected errors
 - Operating system version is not supported
 - *libgpiod* version is not supported
-- **gpio** is not defined as GPIO in [pinout.xyz](pinout.xyz). 
+- **gpio** is not defined as GPIO in [pinout.xyz](https://pinout.xyz). 
 - **gpio** is already used by another instance.
 - **type** value is not recognized.
 - **type**='pwm' and **gpio** is not properly configured.
