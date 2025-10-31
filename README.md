@@ -22,7 +22,7 @@ npm install rpi-io
 
 By default rpi-io does not require specific configuration.
 
-If you want to use [hardware-base PWM](https://pinout.xyz/pinout/pwm) peripherals, some configuration is required:
+If you want to use [hardware-based PWM](https://pinout.xyz/pinout/pwm) peripherals, some configuration is required:
 
 - Open the file  `/boot/firmware/config.txt` and add the required [dtoverlay](https://www.raspberrypi.com/documentation/computers/configuration.html#part3.1) configuration for PWM as showned in the examples below.
 
