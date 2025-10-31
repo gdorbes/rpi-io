@@ -424,6 +424,5 @@ The following table summarizes GPIO *set* average times with rpi-io v1.1.0 and v
 | -------- | ------- | ---------- | ---------- |
 | Bookworm | 1.37 ms | 4.56 ms    | 9.07 ms    |
 | Trixie   | 3.82 ms | not tested | not tested |
-
 ---
 
