@@ -1,11 +1,13 @@
 {
   "name": "rpi-io",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Nodejs module to control Raspbbery Pi GPIO",
   "keywords": [
     "raspberry",
     "gpio",
-    "nodejs"
+    "nodejs",
+    "esm",
+    "pwm"
   ],
   "homepage": "https://github.com/gdorbes/rpi-io#readme",
   "bugs": {
@@ -15,11 +17,16 @@
     "type": "git",
     "url": "git+https://github.com/gdorbes/rpi-io.git"
   },
-  "license": "ISC",
+  "license": "MIT",
   "author": "Guillaume DORBES",
   "type": "module",
-  "main": "index.mjs",
+  "engines" : {
+    "npm" : ">=10.0.0",
+    "node" : ">=23.0.0"
+  },
+  "main": "./esm/rio.mjs",
+  "exports": "./esm/rio.mjs",
   "scripts": {
-    "test": "test.mjs"
+    "test":"node ./scr/test.js"
   }
 }
