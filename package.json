@@ -1,13 +1,16 @@
 {
   "name": "rpi-io",
-  "version": "1.1.4",
-  "description": "Nodejs module to control Raspbbery Pi GPIO",
+  "version": "1.1.5",
+  "description": "Nodejs module to control Raspberry Pi GPIO",
   "keywords": [
     "raspberry",
     "gpio",
+    "libgpiod",
     "nodejs",
     "esm",
-    "pwm"
+    "pwm",
+    "bookworm",
+    "trixie"
   ],
   "homepage": "https://github.com/gdorbes/rpi-io#readme",
   "bugs": {

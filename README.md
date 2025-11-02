@@ -24,7 +24,7 @@ By default rpi-io does not require specific configuration.
 
 If you want to use [hardware-based PWM](https://pinout.xyz/pinout/pwm) peripherals, some configuration is required:
 
-- Open the file  `/boot/firmware/config.txt` and add the required [dtoverlay](https://www.raspberrypi.com/documentation/computers/configuration.html#part3.1) configuration for PWM as showned in the examples below.
+- Open the file  `/boot/firmware/config.txt` and add the required [dtoverlay](https://www.raspberrypi.com/documentation/computers/configuration.html#part3.1) configuration for PWM as showed in the examples below.
 
 ```shell
 # Examples of PWM configuration to add to/boot/firmware/config.txt
@@ -273,7 +273,7 @@ console.log("servo position = 0°");
 
 ##### Parameters
 
-All time parameters are defined in nano-seconds (ns).
+All time parameters are defined in nanoseconds (ns).
 
 - **period** *{Number}* Time period in which [duty cycle](https://en.wikipedia.org/wiki/Pulse-width_modulation) varies.
 - **duty** *{Number}* Initial duty cycle.
@@ -331,6 +331,16 @@ servo.pwmDuty(1500000)
 
 
 ### Utility functions
+#### Rio.stopMonitoring()
+
+To stop monitoring subprocess when leaving your app script or in case of failure. This prevents having a runaway subprocess that could block a new call to the `monitor()` method.
+
+##### Example
+
+```javascript
+Rio.stopMonitoring()
+```
+
 #### Rio.config(gpio)
 
 To return configuration of some GPIO
@@ -379,7 +389,7 @@ console.log(Rio.version())
 
 #### Rio.os()
 
-To retrieve Rapsberry Pi OS info.
+To retrieve Raspberry Pi OS info.
 
 ##### Example
 
@@ -418,10 +428,10 @@ Rio.isSystemSupported() // See console below
 
 ## Benchmark
 
-The following table summarizes GPIO *set* average times with rpi-io v1.1.0 and various hardwares and OS.
+The following table summarizes GPIO *set* average times with rpi-io v1.1.0 and various hardware and OS.
 
 |          | RPi 5B  | RPi 4B     | RPi Zero2  |
-| -------- | ------- | ---------- | ---------- |
+|----------|---------|------------|------------|
 | Bookworm | 1.37 ms | 4.56 ms    | 9.07 ms    |
 | Trixie   | 3.82 ms | not tested | not tested |
 ---
