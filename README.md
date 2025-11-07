@@ -1,5 +1,5 @@
 # rpi-io
-![Static Badge](https://img.shields.io/badge/rpi--io-_1.1.4_-FF5500?style=flat) ![Static Badge](https://img.shields.io/badge/Nodejs-%3E_23-66cc33?logo=nodedotjs&logoColor=white) ![Static Badge](https://img.shields.io/badge/NPM-%3E_10-CC3534?logo=npm&logoColor=white) ![Static Badge](https://img.shields.io/badge/Raspberry_Pi-Zero2_4B_5B-C51A4A?logo=raspberrypi&logoColor=white) ![Static Badge](https://img.shields.io/badge/OS-Bookworm_Trixie-0D7AB9?style=flat)
+![Static Badge](https://img.shields.io/badge/rpi--io-_1.2.x_-FF5500?style=flat) ![Static Badge](https://img.shields.io/badge/Nodejs-%3E_23-66cc33?logo=nodedotjs&logoColor=white) ![Static Badge](https://img.shields.io/badge/NPM-%3E_10-CC3534?logo=npm&logoColor=white) ![Static Badge](https://img.shields.io/badge/Raspberry_Pi-Zero2_4B_5B-C51A4A?logo=raspberrypi&logoColor=white) ![Static Badge](https://img.shields.io/badge/OS-Bookworm_Trixie-0D7AB9?style=flat)
 
 
 **rpi-io** is a lite [ESM](https://nodejs.org/api/esm.html#modules-ecmascript-modules) module for **Node.js** to control **Raspberry Pi** GPIO: access (in, out), input event detection and [PWM](https://en.wikipedia.org/wiki/Pulse-width_modulation) peripheral control.
@@ -228,7 +228,7 @@ let currentValue = myInput.get();
 
 
 
-#### monitor(edge, callback)
+#### monitor(edge, callback, options)
 
 To monitor activities on some *in* GPIO and receive events in a callback function.
 
@@ -246,6 +246,9 @@ myButton.monitor("both", event => {
 
 - **edge** *{String}* 'rising', 'falling' or 'both'. Any other value stops  instance monitoring.
 - **callback** *{Function}*  Callback function with one Object parameter for input events on instance e.g. `event = {edge: 'rising,' time: 'Thu Oct 30 2025 18:12:35 GMT+0100'}`
+- **options** *{Object}* Default value is `{bias: 'disable', bounce: 0}`
+    - `bias` To configure according your input connection. Supported value ares 'disable', 'pull-down' and 'pull-up'.
+    - `bounce` Delay in ms to filter callback on rebounce. Value between 0 and 1000. 0 means no filter.
 
 ##### Detected errors
 
@@ -430,9 +433,13 @@ Rio.isSystemSupported() // See console below
 
 The following table summarizes GPIO *set* average times with rpi-io v1.1.0 and various hardware and OS.
 
-|          | RPi 5B  | RPi 4B     | RPi Zero2  |
-|----------|---------|------------|------------|
-| Bookworm | 1.37 ms | 4.56 ms    | 9.07 ms    |
-| Trixie   | 3.82 ms | not tested | not tested |
+💡 If you can, stick to *Bookworm*: **rpi-io** has stability and performance issues with Trixie and libgpiod v2.2.1. I did not test libgpiod v1.6.3 on Trixie.
+
+|          | RPi 5B  | RPi 4B   | RPi Zero2  |
+|----------|---------|----------|------------|
+| Bookworm | 1.37 ms | 4.56 ms  | 9.07 ms    |
+| Trixie   | 3.82 ms | 11.29 ms | not tested |
+
+
 ---
 

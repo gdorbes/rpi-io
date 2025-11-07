@@ -1,7 +1,7 @@
 // -------------------------------------------------------------------
 // RPi GPIO CONTROL - UTILITIES
 // -------------------------------------------------------------------
-import {log,trap} from "./dev.mjs"
+import {log, trap} from "./dev.mjs"
 import {execSync, execFileSync, spawnSync} from "child_process"
 
 // -------------------------------------------------------------------
@@ -64,7 +64,7 @@ export const exeShell = cmd => {
  * @param {Array} args
  * @return {String} stdout or ""
  */
-export const exeFile = (file, args) => {
+export const exeFile = (file, args = []) => {
     try {
         return execFileSync(file, args, {
             stdio: "pipe",

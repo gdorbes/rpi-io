@@ -33,12 +33,8 @@ export class Rio {
     static PWM_CHIP = "pwmchip0"
     static TYPES = ["in", "out", "pwm"]
 
-    // List of used GPIOs
-    static used_gpios = []
-    // Object list of monitored inputs
-    static monitored = {}
-    // Current monitoring process
-    static monitoringProcess = null
+    // Map of instances
+    static instances = new Map()
 
     // ---------------------------------------------------------------
     // GENERIC METHODS: constructor, disable
@@ -51,13 +47,18 @@ export class Rio {
      */
     constructor(gpio, type) {
 
-        this.chip = Rio.RPI_CHIP
         this.gpio = gpio
         this.gpioStr = this.gpio.toString()
         this.gpioName = "GPIO" + this.gpioStr
         this.type = type
         this.os = Rio.os().name
         this.versionLib = Rio.version().substring(0, 4)
+        // Monitoring properties
+        this.watch = {
+            edge: "stop",
+            callback: false,
+            process: null
+        }
 
         // OS is not supported
         if (Rio.TESTED_OS.indexOf(this.os) === -1)
@@ -78,33 +79,18 @@ export class Rio {
         if (Rio.RPI_GPIOS.indexOf(gpio) === -1)
             throw new Error("This gpio is not supported: " + gpio)
 
-        // gpio is already used
-        if (Rio.used_gpios.indexOf(gpio) !== -1)
-            throw new Error("This gpio is already used: " + gpio)
+        // gpio is already defined
+        if (Rio.instances.has(gpio))
+            throw new Error("This gpio is already defined: " + gpio)
 
         // this.read, this.write, monArgs depending on gpiolib version
         switch (this.versionLib) {
             case "v1.6":
-                this.write = (value, time = 0) => {
+                this.write = (value) => {
                     exeFile("gpioset", [Rio.RPI_CHIP, this.gpioStr + "=" + value])
                 }
                 this.read = () => {
                     return exeFile("gpioget", [Rio.RPI_CHIP, this.gpioStr])
-                }
-                this.monArgs = gpios => {
-                    let args = []
-                    args.push("-b") // line-buffered: output is flushed after every line
-                    args.push("--format=%o %e") // gpio, edge. Others: seconds(%s) and nanoseconds (%n)
-                    args.push(Rio.RPI_CHIP)
-                    args = args.concat(gpios)
-                    return args
-                }
-                this.monData = data => {
-                    const [gpio, edge] = data.toString().trim().split(/\s+/)
-                    return {
-                        gpio: gpio,
-                        edge: edge
-                    }
                 }
                 break
             case "v2.2":
@@ -113,19 +99,6 @@ export class Rio {
                 }
                 this.read = () => {
                     return exeFile("gpioget", ["--numeric", this.gpioName])
-                }
-                this.monArgs = gpios => {
-                    gpios = gpios.map(gpio => "GPIO" + gpio)
-                    let args = []
-                    args = args.concat(gpios)
-                    return args
-                }
-                this.monData = data => {
-                    const [time, edge, gpio] = data.toString().trim().split(/\s+/)
-                    return {
-                        gpio: gpio.substring(5,7),
-                        edge: edge
-                    }
                 }
                 break
         }
@@ -148,21 +121,26 @@ export class Rio {
             this.pathPwm = "/sys/class/pwm/" + this.pwm + "/"
             this.pathChannel = this.pathPwm + "pwm" + this.channel + "/"
         }
+        // Everything OK => Add this to instance list
+        Rio.instances.set(gpio, this)
+        log("new gpio instance created:", this.gpio)
     }
 
     /** --------------------------------------------------------------
      * @function disable
-     * @description Remove instance from Rio.used_gpios
+     * @description Remove instance from Rio.instances
      *              Set this.gpio = -1
      */
     disable() {
-        const i = Rio.used_gpios.indexOf(this.gpio)
-        if (this.gpio === -1 || i === -1) {
-            log("gpio", this.gpio, "is already disabled")
-        } else {
-            Rio.used_gpios.splice(i, 1)
-            log("gpio", this.gpio, "has been disabled")
+        if (Rio.instances.has(this.gpio)) {
             this.gpio = -1
+            this.watch.edge = "stop"
+            this.watch.callback = false
+            this.watch.process !== null ? this.watch.process.kill("SIGTERM") : false
+            Rio.instances.delete(this.gpio)
+            log("gpio", this.gpio, "has been disabled")
+        } else {
+            log("gpio", this.gpio, "is already disabled")
         }
     }
 
@@ -224,12 +202,111 @@ export class Rio {
     }
 
     /** --------------------------------------------------------------
+     * @function monArgs
+     * @description Utility to take care gpiomon arguments according to libgpiod version
+     * @param {Array} gpios
+     * @param {Object} opt
+     * @return {Array}
+     */
+    #monArgs = (gpios, opt) => {
+        let args = []
+        switch (this.versionLib) {
+            case "v1.6":
+                args.push("-b") // line-buffered: output is flushed after every line
+                args.push("--bias=" + opt.bias)
+                args.push("--format=%o %e") // gpio, edge. Others: seconds(%s) and nanoseconds (%n)
+                args.push(Rio.RPI_CHIP)
+                return args.concat(gpios)
+            case "v2.2":
+                opt.bias === "disable" ? opt.bias = "disabled" : false
+                gpios = gpios.map(gpio => "GPIO" + gpio)
+                args.push("--bias")
+                args.push(opt.bias)
+                return args.concat(gpios)
+        }
+    }
+
+    /** --------------------------------------------------------------
+     * @function monData
+     * @description Utility to take care of gpiomon stdout data
+     * @param {String} data
+     * @return {Object}
+     */
+    #monData = data => {
+        switch (this.versionLib) {
+            case "v1.6":
+                const [gpioV1, edgeV1] = data.toString().trim().split(/\s+/)
+                return {
+                    gpio: gpioV1,
+                    edge: edgeV1
+                }
+            case "v2.2":
+                const [timeV2, edgeV2, gpioV2] = data.toString().trim().split(/\s+/)
+                return {
+                    time: timeV2,
+                    gpio: gpioV2.substring(5, 7),
+                    edge: edgeV2
+                }
+        }
+    }
+    /** --------------------------------------------------------------
+     * @function monCallback
+     * @description Utility to trigger callback from gpiomon stdout data
+     * @param {String} data
+     */
+    #monCallback = data => {
+        const eventData = this.#monData(data)
+        const now = new Date()
+        const delta = Math.max(1, now - this.monitoredEvent.latest) // delta is always > 0ms
+        const edge = eventData.edge === "1" ? "rising" : "falling"
+
+        // Bounce detected
+        if (delta <= this.bounceTime && edge === this.monitoredEvent.edge) {
+            log("bounce detected on gpio", this.gpio, edge, delta + "ms")
+        }
+        // Trigger callback according to edge requirement
+        else {
+            if (this.watch.enabled.indexOf(edge) !== -1)
+                this.watch.callback(edge, now)
+            // log("monitored event on gpio", this.gpio, edge,)
+        }
+
+        // Update latest monitored event
+        this.monitoredEvent.latest = now
+        this.monitoredEvent.edge = edge
+    }
+
+    /** --------------------------------------------------------------
      * @function monitor
      * @description Wait for edge events
      * @param {String} edge {'stop', 'rising', 'falling' 'both'}
      * @param {Function} callback (edge, time)
+     * @param {Object} opt  - opt.bias {'disable','pull-up','pull-down'}
+     *                      - opt.bounce 0-1000
      */
-    monitor(edge, callback) {
+    monitor(edge, callback, opt) {
+
+        // Default and clean parameters
+        const defaultCallback = (edge, time) => {
+            log("gpio", this.gpio, "event:", edge, time)
+        }
+        const defopt = {
+            bias: "disable",
+            bounce: 0
+        }
+
+        callback === undefined ? callback = defaultCallback : false
+        opt = {...defopt, ...opt}
+        opt.bounce < 0 ? opt.bounce = 0 : false
+        opt.bounce > 1000 ? opt.bounce = 1000 : false
+        this.bounceTime = opt.bounce
+        this.monitoredEvent = {
+            latest: new Date(null),
+            edge: "none"
+        }
+
+        const biases = ["disable", "pull-up", "pull-down"]
+        biases.indexOf(opt.bias) === -1 ? opt.bias = "disable" : false
 
         if (this.gpio === -1)
             throw new Error("This instance is disabled")
@@ -237,47 +314,51 @@ export class Rio {
         if (this.type !== "in")
             throw new Error("Monitor is dedicated to 'in' instances")
 
-        // Update monitoring list
-        Rio.monitored[this.gpio] = {
-            edge: edge,
-            callback: callback
-        }
+        if (["stop", "rising", "falling", "both"].indexOf(edge) === -1)
+            throw new Error("Edge " + edge + "is not supported")
 
-        // Suspend current monitoring if any
-        if (Rio.monitoringProcess !== null) {
-            Rio.monitoringProcess.kill("SIGTERM")
-            Rio.monitoringProcess = null
-        }
+        if (typeof callback !== "function")
+            throw new Error("Callback is not a function")
 
-        // Default stop command => Remove current gpio from monitoring list
-        if (["rising", "falling", "both"].indexOf(edge) === -1) {
-            delete Rio.monitored[this.gpio]
-            log("gpio", this.gpio, "is no longer being monitored")
-        }
+        // First time the instance is monitored or has been stopped
+        if (this.watch === "stop") {
 
-        // If monitored list is not empty => relaunch gpiomon
-        const list = Object.keys(Rio.monitored)
-        if (list.length > 0) {
-            Rio.monitoringProcess = spawn("gpiomon", this.monArgs(list))
-            Rio.monitoringProcess.stdout.on("data", data => {
-                // Retrieve event data
-                const evd = this.monData(data)
-                const that = Rio.monitored[parseInt(evd.gpio)]
-                if (typeof that.callback === "function") {
-                    if (evd.edge === "1") {
-                        if (that.edge === "rising" || that.edge === "both")
-                            that.callback("rising", new Date())
-                    } else {
-                        if (that.edge === "falling" || that.edge === "both")
-                            that.callback("falling", new Date())
-                    }
+            if (edge === "stop") {
+                trap("cannot stop an unstarted monitoring on gpio", this.gpio)
+            }
+            // Edge is in ["rising", "falling", "both"]
+            else {
+                this.watch = {
+                    edge: edge,
+                    enabled: edge === "both" ? ["rising", "falling"] : [edge],
+                    callback: callback,
+                    process: spawn("gpiomon", this.#monArgs([this.gpio], opt))
                 }
-            })
-            Rio.monitoringProcess.stderr.on("data", data => {
-                trap("gpiomon stderr:", Buffer.from(data).toString())
-            })
-        } else {
-            log("no more gpio to monitor")
+                this.watch.process.stdout.on("data", this.#monCallback)
+            }
+        }
+        // Instance is already monitored
+        else {
+            // Stop: Kill process and delete monitored data
+            if (edge === "stop") {
+                this.watch.process !== null ? this.watch.process.kill("SIGTERM") : false
+                this.watch.edge = "stop"
+                this.watch.enabled = []
+                this.watch.callback = false
+                this.watch.process = null
+                Rio.instances.set(this.gpio, this)
+                log("monitoring of gpio", this.gpio, "has been stopped")
+            }
+
+            // Kill process, update edge and callback, define new process
+            else {
+                this.watch.process !== null ? this.watch.process.kill("SIGTERM") : false
+                this.watch.edge = edge
+                this.watch.enabled = edge === "both" ? ["rising", "falling"] : [edge]
+                this.watch.callback = callback
+                this.watch.process = spawn("gpiomon", this.#monArgs([this.gpio], opt))
+                this.watch.process.stdout.on("data", this.#monCallback)
+            }
         }
     }
 
@@ -321,9 +402,9 @@ export class Rio {
 
         // Check duty cycle
         if (duty < this.dutyMin)
-            throw new Error("PWM duty", duty, " is lower than duty min", this.dutyMin)
+            throw new Error("PWM duty " + duty + " is lower than duty min " + this.dutyMin)
         if (duty > this.dutyMax)
-            throw new Error("PWM duty", duty, " is upper than duty max", this.dutyMax)
+            throw new Error("PWM duty" + duty + " is upper than duty max" + this.dutyMax)
 
         log("channel", this.channel, "normalized PWM data (period, duty, duty min, duty max):", this.period, this.duty, this.dutyMin, this.dutyMax)
 
@@ -450,10 +531,15 @@ Rio.version = () => {
  * @description Stop monitoring of all inputs
  */
 Rio.stopMonitoring = () => {
-    Rio.monitoringProcess !== null ? Rio.monitoringProcess.kill("SIGTERM") : false
-    Rio.monitored = {}
-    Rio.monitoringProcess = null
-    log("gpio monitoring stopped")
+    Rio.instances.forEach((that) => {
+        if (that.watch.process !== null) {
+            that.watch.process.kill("SIGTERM")
+            that.watch.edge = "stop"
+            that.watch.callback = false
+            that.watch.process = null
+            log("monitoring of gpio", that.gpio, "has been stopped")
+        }
+    })
 }
 
 /** ------------------------------------------------------------------
@@ -504,8 +590,6 @@ Rio.os = () => {
  * @return {Boolean}
  */
 Rio.isSystemSupported = () => {
-
-    const info = Rio.cpuInfo()
 
     // Test hardware
     if (/Raspberry Pi/i.test(Rio.cpuInfo()) === false) {

@@ -84,19 +84,25 @@ function isNumber(str) {
             if (gpio > 0) {
                 const btn = new Rio(gpio, "in")
                 btn.get()
-                /*  btn.monitor("both", (event, time) => {
-                      log("event", event)
-                  }) */
             }
             break
         case "monitor":
-            gpio = isNumber(process.argv[3])
-            if (gpio > 0) {
-                const btn = new Rio(gpio, "in")
-                btn.monitor("both", (event) => {
-                    log("event", event)
-                })
+            const gpio1 = isNumber(process.argv[3])
+            const gpio2 = isNumber(process.argv[4])
+            let btn1, btn2
+            if (gpio1 > 0) {
+                btn1 = new Rio(gpio1, "in")
+                btn1.monitor("rising")
             }
+            if (gpio2 > 0) {
+                btn2 = new Rio(gpio2, "in")
+                btn2.monitor("falling", () => {
+                    log(gpio2, "falling")
+                }, {bias: "pull-down"})
+            }
+            setTimeout(() => {
+                btn1.monitor("stop")
+            }, 6000)
             break
         case "benchmark":
             const gpioOut = isNumber(process.argv[3])
@@ -138,7 +144,7 @@ function isNumber(str) {
             setTimeout(() => {
                 servo.pwmDuty(1500000)
                 log("servo position = 90°")
-            },2000)
+            }, 2000)
 
             // after 4s -> duty=1.5 ms
             setTimeout(() => {
