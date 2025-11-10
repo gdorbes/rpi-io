@@ -1,7 +1,7 @@
 // -------------------------------------------------------------------
 // RPi GPIO CONTROL TEST SCRIPT
 // -------------------------------------------------------------------
-import {log, trap, now} from "../esm/dev.mjs"
+import {log, trap, nowStr} from "../esm/dev.mjs"
 import {ctrlC} from "../esm/utl.mjs"
 import {Rio} from "../esm/rio.mjs"
 
@@ -12,7 +12,7 @@ import {Rio} from "../esm/rio.mjs"
  * @param {String} txt
  */
 function info(cmd, txt) {
-    console.log(now(), "🔎", "\x1b[38;2;0;160;16m", cmd, "\x1b[0m", txt)
+    console.log(nowStr(), "🔎", "\x1b[38;2;0;160;16m", cmd, "\x1b[0m", txt)
 }
 
 /** ------------------------------------------------------------------
@@ -35,7 +35,7 @@ function isNumber(str) {
 // TOP LEVEL TEST
 // -------------------------------------------------------------------
 (function () {
-    Rio.log(2)
+    Rio.logCfg(2)
     ctrlC(Rio.stopMonitoring)
 
     if (process.argv.length < 3) {

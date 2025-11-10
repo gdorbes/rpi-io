@@ -6,7 +6,7 @@
 import {spawn} from "child_process";
 import {writeFileSync, readFileSync} from "fs"
 import {exeFile, exeShell, wait} from "./utl.mjs"
-import {cfgLog, log, trap} from "./dev.mjs"
+import {logCfg, log, trap} from "./dev.mjs"
 
 // -------------------------------------------------------------------
 // CLASS RIO AND FURTHER
@@ -629,9 +629,13 @@ Rio.isSystemSupported = () => {
     return true
 }
 /** ------------------------------------------------------------------
+ * @function Rio.logCfg
+ */
+Rio.logCfg = logCfg
+/** ------------------------------------------------------------------
  * @function Rio.log
  */
-Rio.log = cfgLog
+Rio.log = log
 // -------------------------------------------------------------------
 // EoF
 // -------------------------------------------------------------------

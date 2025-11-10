@@ -1,3 +1,7 @@
+1.2.1 - Nov 10, 2025
+===================
+* Change utility API function name from `Rio.log` to `Rio.logCfg`.
+
 1.2.0 - Nov 07, 2025
 ===================
 * New option parameter for method `monitor` to take care of bias and bounces.

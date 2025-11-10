@@ -406,7 +406,7 @@ console.log(Rio.os())
 
 To check if device is supported by **rpi-io** (device, model, os, middleware). It returns  *true/false* and displays details in console.
 
-#### Rio.log(level)
+#### Rio.logCfg(level)
 To set the level of console used in the module:
 
 - 0: no console
@@ -417,9 +417,9 @@ To set the level of console used in the module:
 
 ```javascript
 import {Rio} from "rpi-io";
-Rio.log(0)
+Rio.logCfg(0)
 Rio.isSystemSupported() // Nothing displayed in console
-Rio.log(2)
+Rio.logCfg(2)
 Rio.isSystemSupported() // See console below
 // 08:15:16.506 🔎  👍  Hardware is Raspberry Pi
 // 08:15:16.539 🔎  👍  Raspberry Pi 5 Model B Rev 1.0 is supported

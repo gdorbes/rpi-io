@@ -9,11 +9,11 @@ let debug = {
 // -------------------------------------------------------------------
 // FUNCTIONS
 /** ------------------------------------------------------------------
- * @function now
+ * @function nowStr
  * @description Return timestamp as formatted string
  * @return {String}
  */
-export const now = () => {
+export const nowStr = () => {
     const date = new Date()
     return date.toLocaleTimeString() + "." + date.getMilliseconds().toLocaleString('en', {
         minimumIntegerDigits: 3,
@@ -29,7 +29,7 @@ export const now = () => {
  */
 export const log = function () {
     if (debug.log)
-        console.log.apply(console, Array.prototype.concat.apply([now(), "🔎 "], arguments))
+        console.log.apply(console, Array.prototype.concat.apply([nowStr(), "🔎 "], arguments))
 }
 
 /** ------------------------------------------------------------------
@@ -38,15 +38,15 @@ export const log = function () {
  */
 export const trap = function () {
     if (debug.trap)
-        console.log.apply(console, Array.prototype.concat.apply([now(), "⚠️", "\x1b[38;2;255;80;0m", ...arguments, "\x1b[0m"]))
+        console.log.apply(console, Array.prototype.concat.apply([nowStr(), "⚠️", "\x1b[38;2;255;80;0m", ...arguments, "\x1b[0m"]))
 }
 
 /** ------------------------------------------------------------------
- * @function cfgLog
+ * @function logCfg
  * @description Set log configuration
  * @param {Number} level    0: no log, 1: trap only, 2: trap and log
  */
-export const cfgLog = level => {
+export const logCfg = level => {
     debug = {
         log: false,
         trap: false
