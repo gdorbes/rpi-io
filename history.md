@@ -1,6 +1,7 @@
-1.2.1 - Nov 10, 2025
+1.2.2 - Nov 10, 2025
 ===================
 * Change utility API function name from `Rio.log` to `Rio.logCfg`.
+* Minor fixes
 
 1.2.0 - Nov 07, 2025
 ===================
