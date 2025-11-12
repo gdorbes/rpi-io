@@ -334,6 +334,16 @@ servo.pwmDuty(1500000)
 
 
 ### Utility functions
+#### Rio.disableAll()
+
+To to disable all instances
+
+##### Example
+
+```javascript
+Rio.disableAll()
+```
+
 #### Rio.stopMonitoring()
 
 To stop monitoring subprocess when leaving your app script or in case of failure. This prevents having a runaway subprocess that could block a new call to the `monitor()` method.

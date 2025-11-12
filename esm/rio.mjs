@@ -133,12 +133,30 @@ export class Rio {
      */
     disable() {
         if (Rio.instances.has(this.gpio)) {
-            this.gpio = -1
-            this.watch.edge = "stop"
-            this.watch.callback = false
-            this.watch.process !== null ? this.watch.process.kill("SIGTERM") : false
+
+            // Stop watch process
+            if (this.type === "in") {
+                this.watch.edge = "stop"
+                this.watch.callback = false
+                if (this.watch.process !== null) {
+                    this.watch.process.kill("SIGTERM")
+                    log("monitoring of gpio", this.gpio, "has been stopped")
+                }
+            }
+
+
+            // Disable signal then unexport channel
+            if (this.type === "pwm") {
+                writeFileSync(this.pathChannel + "enable", "0")
+                this.enabled = false
+                writeFileSync(this.pathPwm + "unexport", this.channel)
+                this.exported = true
+            }
+
+            // Delete entry in instance Map
             Rio.instances.delete(this.gpio)
             log("gpio", this.gpio, "has been disabled")
+            this.gpio = -1
         } else {
             log("gpio", this.gpio, "is already disabled")
         }
@@ -532,13 +550,22 @@ Rio.version = () => {
  */
 Rio.stopMonitoring = () => {
     Rio.instances.forEach((that) => {
+        that.watch.edge = "stop"
+        that.watch.callback = false
         if (that.watch.process !== null) {
             that.watch.process.kill("SIGTERM")
-            that.watch.edge = "stop"
-            that.watch.callback = false
-            that.watch.process = null
             log("monitoring of gpio", that.gpio, "has been stopped")
         }
+    })
+}
+
+/** ------------------------------------------------------------------
+ * @function Rio.disableAll
+ * @description Disable all instances
+ */
+Rio.disableAll = () => {
+    Rio.instances.forEach((that) => {
+        that.disable()
     })
 }
 
@@ -642,6 +669,7 @@ Rio.log = log
  * @function Rio.trap
  */
 Rio.trap = trap
+
 // -------------------------------------------------------------------
 // EoF
 // -------------------------------------------------------------------

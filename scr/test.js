@@ -158,6 +158,9 @@ function isNumber(str) {
                 log("servo stopped")
             }, 5000)
             break
+        case "disable":
+            Rio.disableAll()
+            break
         default:
             trap("Unknown command: Type 'test help' to display list of commands.")
     }

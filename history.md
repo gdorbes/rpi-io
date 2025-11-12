@@ -1,3 +1,9 @@
+1.2.4 - Nov 12, 2025
+===================
+* fix in `Rio.stopMonitoring()`
+* fix in method `disable()`
+* New utility function: `Rio.disableAll()`
+
 1.2.2 - Nov 10, 2025
 ===================
 * Change utility API function name from `Rio.log` to `Rio.logCfg`.
