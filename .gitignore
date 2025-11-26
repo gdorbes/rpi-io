@@ -1,0 +1,20 @@
+# macOS files
+.DS_Store
+
+# PHP Storm IDE settings
+.idea
+
+# Environment variables
+.env
+
+# Dependencies
+node_modules/
+
+# Archived versions
+/_archive/
+
+# Misc dev
+/dev/
+
+# Test packs
+*.tgz

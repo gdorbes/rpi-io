@@ -1,0 +1,85 @@
+{
+  "name": "rpi-io",
+  "version": "2.0.0",
+  "description": "Nodejs module to control Raspberry Pi GPIO",
+  "keywords": [
+    "raspberry",
+    "raspberry-pi",
+    "gpio",
+    "libgpiod",
+    "nodejs",
+    "esm",
+    "napi",
+    "output",
+    "input",
+    "monitor",
+    "pwm",
+    "linux",
+    "bookworm",
+    "trixie",
+    "iot",
+    "embedded"
+  ],
+  "homepage": "https://github.com/gdorbes/rpi-io#readme",
+  "bugs": {
+    "url": "https://github.com/gdorbes/rpi-io/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gdorbes/rpi-io.git"
+  },
+  "license": "MIT",
+  "author": "Guillaume DORBES",
+  "engines": {
+    "npm": ">=10.0.0",
+    "node": ">=23.0.0"
+  },
+  "main": "esm/main.mjs",
+  "exports": "./esm/main.mjs",
+  "type": "module",
+  "scripts": {
+    "preinstall": "chmod +x script/*.sh 2>/dev/null || true",
+    "install": "node-gyp rebuild",
+    "postinstall": "echo 'Installation complete!'",
+    "clean": "node-gyp clean",
+    "configure": "node-gyp configure",
+    "//---- Shell scripts ----": "To check environment and libgpiod version",
+    "check": "bash script/check-env.sh",
+    "detect-version": "bash script/detect-gpiod-version.sh",
+    "//---- Javascript scripts ----": "Misc examples and tests",
+    "line-write": "node ./test/write.js",
+    "line-read": "node ./test/read.js",
+    "line-pwm-led": "node ./test/pwm-led.js",
+    "line-pwm-motor": "node ./test/pwm-motor.js",
+    "benchmark-write": "node ./test/benchmark-write.js",
+    "benchmark-read": "node ./test/benchmark-read.js",
+    "benchmark-pwm": "node ./test/benchmark-pwm.js",
+    "test-close": "node ./test/close-all.js",
+    "test-instance": "node ./test/duplicate-error.js",
+    "test-line": "node ./test/line-configuration.js"
+  },
+  "os": [
+    "linux"
+  ],
+  "cpu": [
+    "arm",
+    "arm64"
+  ],
+  "dependencies": {
+    "node-addon-api": "^7.0.0"
+  },
+  "devDependencies": {
+    "node-gyp": "^10.0.0"
+  },
+  "gypfile": true,
+  "binary": {
+    "napi_versions": [
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ]
+  }
+}
