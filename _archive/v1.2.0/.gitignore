@@ -10,8 +10,11 @@
 # Dependencies
 node_modules/
 
-# Local old files
+# Archived versions
 /_archive/
+
+# Misc dev
+/dev/
 
 # Test packs
 *.tgz

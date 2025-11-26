@@ -25,7 +25,6 @@
   },
   "license": "MIT",
   "author": "Guillaume DORBES",
-  "type": "module",
   "engines": {
     "npm": ">=10.0.0",
     "node": ">=23.0.0"
