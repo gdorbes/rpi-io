@@ -11,7 +11,7 @@
 node_modules/
 
 # Archived versions
-/_archive/
+_archive/
 
 # Misc dev
 /dev/

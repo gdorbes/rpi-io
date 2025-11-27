@@ -303,7 +303,7 @@ import {RIO, sleep, ctrlC, } from "rpi-io"
     console.log("servo duty = 100%")    // ~ 0.5 + (1.0 * (2.5 ms - 0.5 ms)) = 2.5 ms
     await sleep(2000)
     servo.pwmDuty(0)
-    logconsole.logservo duty = 0%")      // ~ 0.5 + (0.0 * (2.5 ms - 0.5 ms)) = 0.5 ms
+    console.log("servo duty = 0%")      // ~ 0.5 + (0.0 * (2.5 ms - 0.5 ms)) = 0.5 ms
     await sleep(2000)
     servo.close()
     console.log("servo closed")
@@ -372,7 +372,7 @@ node /your-project/node_modules/rpi-io/test/line-configuration.js
 
 The **rpi-io** API is based on the class `RIO` with instance methods.
 
-### RIO class  and generic methods
+### RIO class and methods
 
 ####  constructor RIO(line, mode, opt)
 To create instance according to parameters.
@@ -403,7 +403,7 @@ const myOutput = new RIO(17, "output")
   period: 20000,
   // pwm - dutyMin and dutyMax defines the duty cycle use range in µs
   // 		   especially for servo-motors (See their specs!).
-  dutyMin: 0
+  dutyMin: 0,
   dutyMax: 20000
 }
 ```
@@ -524,7 +524,7 @@ const servo = new RIO(13, "pwm", {
         exportTime: 100,
         period: 20000,
         dutyMin: 500,
-        dutyMax: 2500)
+        dutyMax: 2500})
 
 // duty cycle = 50% between dutyMin and dutyMax
 servo.pwmDuty(50)
@@ -543,8 +543,8 @@ Function to close all instances
 ##### Example
 ```javascript
 import {RIO} from "rpi-io"
-const led = new RIO(line1, "output", {value: 0})
-const btn = new RIO(line2, "input")
+const led = new RIO(17, "output", {value: 0})
+const btn = new RIO(18, "input")
 RIO.closeAll()
 // led and btn are closed 
 ```
@@ -593,7 +593,7 @@ import {sleep, ctrlC} from "rpi-io"
     ctrlC(() => {
         console.log("displayed on script interrupt")
     })
-    await sleep(1000)
+    await sleep(10000)
     console.log("displayed after 10s")
 })()
 ```
