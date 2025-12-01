@@ -19,14 +19,6 @@
       ],
       "defines": [
         "<!@(sh -c 'chmod +x script/detect-gpiod-version.sh 2>/dev/null; bash script/detect-gpiod-version.sh 2>/dev/null || echo LIBGPIOD_V2')"
-      ],
-      "conditions": [
-        ["OS=='linux'", {
-          "libraries": [
-            "-lgpiod",
-            "-lpthread"
-          ]
-        }]
       ]
     }
   ]
