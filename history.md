@@ -1,7 +1,7 @@
-2.0.3 - Dec 1, 2025
+2.0.5 - Dec 1, 2025
 ===================
 * Typos
-* Less restrictive package.json and binding.gyp for dev purpose
+* Internal refactoring
 
 2.0.0 - Nov 26, 2025
 ===================

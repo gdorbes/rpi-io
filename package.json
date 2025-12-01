@@ -1,6 +1,6 @@
 {
   "name": "rpi-io",
-  "version": "2.0.3",
+  "version": "2.0.5",
   "description": "Nodejs module to control Raspberry Pi GPIO",
   "keywords": [
     "raspberry",
@@ -59,9 +59,7 @@
     "test-line": "node ./test/line-configuration.js"
   },
   "os": [
-    "linux",
-    "darwin",
-    "win32"
+    "linux"
   ],
   "cpu": [
     "arm",

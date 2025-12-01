@@ -3,7 +3,9 @@
 // -------------------------------------------------------------------
 import {createRequire} from "node:module"
 import {writeFileSync} from "node:fs"
-import {traceCfg, log, warn, sleep, ctrlC, lineConfig, lineNumber, wait} from "./_util.mjs"
+import {traceCfg, log, warn} from "./log.mjs"
+import {sleep, ctrlC,lineNumber} from "./ctl.mjs"
+import {wait, lineConfig} from "./nut.mjs"
 
 export {traceCfg, log, warn, sleep, ctrlC, lineConfig, lineNumber}
 // -------------------------------------------------------------------

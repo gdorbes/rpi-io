@@ -14,7 +14,7 @@ node_modules/
 _archive/
 
 # Misc dev
-/dev/
+dev/
 
 # Test packs
 *.tgz
