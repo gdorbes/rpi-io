@@ -1,4 +1,4 @@
-2.0.5 - Dec 1, 2025
+2.0.5 - Dec 01, 2025
 ===================
 * Typos
 * Internal refactoring
