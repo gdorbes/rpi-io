@@ -603,7 +603,7 @@ import {sleep, ctrlC} from "rpi-io"
 
 ## Benchmark
 
-The following tables summarizes main operation times on various devices. Results are in micro-seconds (µs).
+The following tables summarize main operation times on various devices. Results are in micro-seconds (µs).
 
 **PLEASE NOTE**: As PWM operations rely on files, performance of microSD cards installed on RPi may have a significant impact on results for `pwmDuty()`.
 
