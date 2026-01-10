@@ -4,6 +4,8 @@
 
 **rpi-io** is a lite [ESM](https://nodejs.org/api/esm.html#modules-ecmascript-modules) module for **Node.js** to control **Raspberry Pi** GPIO: access (in, out), input event detection and [PWM](https://en.wikipedia.org/wiki/Pulse-width_modulation) peripheral control.
 
+**rpi-io** is built on a high performance hybrid architecture based on Node.js + C addon.
+
 **rpi-io** is designed for recent versions of Raspberry and related OS and middlewares. It has been tested in the following environments:
 
 - Raspberry Pi models: *RPi 5,* *RPi 4B* and *RPi Zero 2.*
@@ -12,24 +14,12 @@
     - Input/Output - [libgpiod](https://libgpiod.readthedocs.io/en/stable/) v1.6.3 (*Bookworm*) and v2.2.1 (*Trixie*)
     - PWM - [sysfs](https://en.wikipedia.org/wiki/Sysfs) interface.
 
-
-
-## What's new with version 2
-
-|              | version 1    | version 2                |
-| ------------ | ------------ | ------------------------ |
-| Architecture | Full Node.js | Hybrid Node.js + C addon |
-| Performance  | Low          | High                     |
-
-⚠️ Given the new architecture, the v2 API is not compatible with the v1 one.
-
-
-
+  
 ## Prerequisites
 
 ### libgpiod
 
-By default *libgpiod* is available with the latest Raspberry Pi OS distributions. If you want to install **rpi-io** with older - not tested - distributions, be sure it is installed.
+By default, *libgpiod* is available with the latest Raspberry Pi OS distributions. If you want to install **rpi-io** with older - not tested - distributions, be sure it is installed.
 
 ```bash
 sudo apt-get update
@@ -250,7 +240,7 @@ const btn = new RIO(18, "input", {bias: "pull-up"})
 
 #### Servo motor
 
-REMINDER: PWM peripherals used in hardware mode need some specific [configuration](#Configuration).
+REMINDER: PWM peripherals used in hardware mode need some specific [configuration](## Configuration for PWM-based peripherals).
 
 ##### Diagram for servo-motor *SG90*
 ```
@@ -488,7 +478,7 @@ myButton.monitoringStart(callback, "both", 30)
 
 - **callback** *{Function}*  Function triggered by input events where parameter is *edge* that can be either "rising" (input change from 0 to 1) or "falling" (input change from 1 to 0).
 - **edge** *{String}* Filter of monitored events: "rising", "falling", "both" (default value).
-- **bounce** *{Number}* Set thresold in ms to filter consecutive events of same type. Default value is 0.
+- **bounce** *{Number}* Set threshold in ms to filter consecutive events of same type. Default value is 0.
 
 
 
