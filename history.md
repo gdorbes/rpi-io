@@ -1,5 +1,10 @@
-2.0.5 - Dec 01, 2025
+2.0.9 - Feb 03, 2029
 ===================
+* `package.json`: node-gyp version update to fix *tar* vulnerabilities
+* `README.md`: Explanations for *tar* warnings.
+
+2.0.5 - Dec 01, 2025
+  ===================
 * Typos
 * Internal refactoring
 
