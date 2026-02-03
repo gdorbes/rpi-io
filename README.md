@@ -72,9 +72,13 @@ npm install
 
 If you meet errors during this step, stay in the same directory and check your environment.
 
+
 ```bash
 npm run check
 ```
+If the error is an alert about high-level vulnerabilities related to the *tar* module,
+- be sure that you are installing **rpi-io** version 2.0.8 or more,
+- follow the NPM recommendation to run `npm audit fix --force` to install the appropriate version of *node-gyp*.
 
 If you need to recompile the module when errors are fixed, stay in the same directory and the run the following scripts.
 

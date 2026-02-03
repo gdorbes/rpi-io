@@ -1,6 +1,6 @@
 {
   "name": "rpi-io",
-  "version": "2.0.7",
+  "version": "2.0.8",
   "description": "Nodejs module to control Raspberry Pi GPIO",
   "keywords": [
     "raspberry",
@@ -69,7 +69,7 @@
     "node-addon-api": "^7.0.0"
   },
   "devDependencies": {
-    "node-gyp": "^10.0.0"
+    "node-gyp": "^12.2.0"
   },
   "gypfile": true,
   "binary": {
