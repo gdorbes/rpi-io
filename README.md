@@ -194,7 +194,7 @@ VCC (3.3V)
 
 ```javascript
 // Import rpi-io module
-import {Rio, ctrlC} from "rpi-io"
+import {RIO, ctrlC} from "rpi-io"
 
 // Define instance for IN operation on some GPIO e.g. 18
 const btn = new RIO(18, "input", {bias: "pull-down"})
@@ -435,7 +435,7 @@ To write some value to "output" instance.
 
 ```javascript
 import {RIO} from "rpi-io"
-const myOutput = new Rio(17, "output")
+const myOutput = new RIO(17, "output")
 myOuput.write(1)
 ```
 
@@ -453,7 +453,7 @@ To read value from "input" instance.
 
 ```javascript
 import {RIO} from "rpi-io"
-const myInput = new Rio(18, "input")
+const myInput = new RIO(18, "input")
 const result = myInput.read()
 ```
 
@@ -471,7 +471,7 @@ To start event monitoring of "input" instance.
 
 ```javascript
 import {RIO} from "rpi-io"
-const myButton = new Rio(18, "input")
+const myButton = new RIO(18, "input")
 const callback = edge => {
     console.log("edge:", edge)
 }
@@ -494,7 +494,7 @@ To stop event monitoring of "input" instance.
 
 ```javascript
 import {RIO} from "rpi-io"
-const myButton = new Rio(18, "input")
+const myButton = new RIO(18, "input")
 const callback = 
 myButton.monitoringStart(edge => {console.log("edge:", edge)})
 // Stop monitoring after 10s

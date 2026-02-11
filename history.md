@@ -1,4 +1,8 @@
-2.0.9 - Feb 03, 2029
+2.0.10 - Feb 11, 2026
+===================
+* `README.md`: In code examples, imported class is *RIO*, not *Rio*.
+
+2.0.9 - Feb 03, 2026
 ===================
 * `package.json`: node-gyp version update to fix *tar* vulnerabilities
 * `README.md`: Explanations for *tar* warnings.
