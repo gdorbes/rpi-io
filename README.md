@@ -14,7 +14,7 @@
     - Input/Output - [libgpiod](https://libgpiod.readthedocs.io/en/stable/) v1.6.3 (*Bookworm*) and v2.2.1 (*Trixie*)
     - PWM - [sysfs](https://en.wikipedia.org/wiki/Sysfs) interface.
 
-  
+
 ## Prerequisites
 
 ### libgpiod
@@ -40,9 +40,9 @@ sudo apt-get install -y build-essential python3
 
 ### Node.js
 
-Please make sure that you a recent version of Node.js (v23+) and NPM (v10+).
+Please make sure that you a recent version of Node.js.  Recommended tested versions are v23 and further as they support `require(esm)` by default.
 
-
+Older versions starting at v20.19 where `require(esm)` has been backported should work as well, but they haven't been tested extensively.
 
 ## Installation
 

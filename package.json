@@ -1,6 +1,6 @@
 {
   "name": "rpi-io",
-  "version": "2.0.10",
+  "version": "2.0.11",
   "description": "Nodejs module to control Raspberry Pi GPIO",
   "keywords": [
     "raspberry",
