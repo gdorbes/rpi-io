@@ -10,7 +10,7 @@ import {RIO, traceCfg, log, sleep, ctrlC, lineNumber} from "../esm/main.mjs"
 
     // Init pwm line and set duty = 0%
     const led = new RIO(line, "pwm", {
-        exportTime: 50,// delay for export on init
+        exportTime: -1,// delay for export on init
         period: 1000,  // 1,000,000 ns ~ 1 KHz
         dutyMin: 0,
         dutyMax: 1000

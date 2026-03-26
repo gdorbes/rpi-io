@@ -1,6 +1,7 @@
 # rpi-io
-![Static Badge](https://img.shields.io/badge/rpi--io-_2.0.x_-FF5500?style=flat) ![Static Badge](https://img.shields.io/badge/Nodejs-%3E_23-66cc33?logo=nodedotjs&logoColor=white) ![Static Badge](https://img.shields.io/badge/NPM-%3E_10-CC3534?logo=npm&logoColor=white) ![Static Badge](https://img.shields.io/badge/Raspberry_Pi-Zero2_4B_5B-C51A4A?logo=raspberrypi&logoColor=white) ![Static Badge](https://img.shields.io/badge/OS-Bookworm_Trixie-0D7AB9?style=flat)
+![Static Badge](https://img.shields.io/badge/rpi--io-_2.1.x_-FF5500?style=flat) ![Static Badge](https://img.shields.io/badge/Nodejs-%3E_23-66cc33?logo=nodedotjs&logoColor=white) ![Static Badge](https://img.shields.io/badge/NPM-%3E_10-CC3534?logo=npm&logoColor=white) ![Static Badge](https://img.shields.io/badge/Raspberry_Pi-Zero2_4B_5B-C51A4A?logo=raspberrypi&logoColor=white) ![Static Badge](https://img.shields.io/badge/OS-Bookworm_Trixie-0D7AB9?style=flat)
 
+Current version is 2.1.0. See latest updates in *history.md*.
 
 **rpi-io** is a lite [ESM](https://nodejs.org/api/esm.html#modules-ecmascript-modules) module for **Node.js** to control **Raspberry Pi** GPIO: access (in, out), input event detection and [PWM](https://en.wikipedia.org/wiki/Pulse-width_modulation) peripheral control.
 
@@ -244,7 +245,7 @@ const btn = new RIO(18, "input", {bias: "pull-up"})
 
 #### Servo motor
 
-REMINDER: PWM peripherals used in hardware mode need some specific [configuration](## Configuration for PWM-based peripherals).
+REMINDER: PWM peripherals used in hardware mode need some specific [configuration](# Configuration for PWM-based peripherals).
 
 ##### Diagram for servo-motor *SG90*
 ```
@@ -304,7 +305,7 @@ import {RIO, sleep, ctrlC, } from "rpi-io"
 })()
 ```
 
-##### Fade-in LED
+#### Fade-in LED
 
 PWM can also be used for progressive LED light with the same electronic circuit as write operations. See example below.
 
@@ -382,20 +383,23 @@ const myOutput = new RIO(17, "output")
 
 ```javascript
 {
-  // output - Initial value
+  // For 'output' mode: Initial value {0,1}.
   value: 0,
-  // input - Circuit bias: "disable", "pull-up", "pull-down"
+    
+  // For 'input' mode: Circuit bias {"disable", "pull-up", "pull-down"}.
   bias: "disable",
-  // pwm - Delay time (ms) required on instance creation
-  //			 depending on device performance. If this value is
-  //       too small, the PWM instance creation fails.
-  //			 Can be reduced for latest RPi 5
-  //			 Must be increased for old RPi Zero.
-  exportTime: 100,
-  // pwm - period defined in μs. Default value is equivalent
-  //			 to a 50 Hz frequency.
+    
+  // For 'pwm' mode: Delay (ms) required on instance creation
+  // to prevent failure due to device performance.
+  //
+  // Since v2.1.0 the default value is set to -1, which means auto delay.
+  // It is computed according to device model e.g. 50 ms for 5Pi or 1000 ms RPi Zero.
+  exportTime: -1,
+    
+  // For 'pwm' mode: Period defined in μs. Default value is equivalent to 50 Hz.
   period: 20000,
-  // pwm - dutyMin and dutyMax defines the duty cycle use range in µs
+    
+  //  For 'pwm' mode: dutyMin and dutyMax defines the duty cycle use range in µs
   // 		   especially for servo-motors (See their specs!).
   dutyMin: 0,
   dutyMax: 20000
@@ -530,7 +534,7 @@ servo.pwmDuty(50)
 
 
 
-### Utilities
+### Static functions
 
 ####  RIO.closeAll()
 Function to close all instances
@@ -544,6 +548,20 @@ RIO.closeAll()
 ```
 
 
+
+#### RIO.model()
+
+Function to return current model of RPi.
+
+```javascript
+import {RIO} from "rpi-io"
+console.log("model:", RIO.model())
+// Returns '5B', '4B', '3B', 'Zero2', 'Zero' or '' when unknown.
+```
+
+
+
+### Utilities
 
 ####  log(args)
 

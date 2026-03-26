@@ -2,9 +2,9 @@
 // RPI-IO: Nodejs GPIO control module
 // -------------------------------------------------------------------
 import {createRequire} from "node:module"
-import {writeFileSync} from "node:fs"
+import {writeFileSync, readFileSync} from "node:fs"
 import {traceCfg, log, warn} from "./log.mjs"
-import {sleep, ctrlC,lineNumber} from "./ctl.mjs"
+import {sleep, ctrlC, lineNumber} from "./ctl.mjs"
 import {wait, lineConfig} from "./nut.mjs"
 
 export {traceCfg, log, warn, sleep, ctrlC, lineConfig, lineNumber}
@@ -45,7 +45,7 @@ export class RIO {
             // input, output
             bias: "disable", // "disable", "pull-up", "pull-down"
             // pwm
-            exportTime: 100,
+            exportTime: -1,
             period: 20000, // μs ~50Hz
             dutyMin: 0, // μs
             dutyMax: 20000 // µs
@@ -69,6 +69,26 @@ export class RIO {
         this.config = lineConfig(this.line) // Required for pwm
         this.pwmExported = false
         this.pwmEnabled = false
+        // Define exportTime when defined to automatic by default
+        if (opt.exportTime === -1) {
+            switch (RIO.model()) {
+                case "5B":
+                    opt.exportTime = 50
+                    break
+                case "4B":
+                    opt.exportTime = 200
+                    break
+                case "3B":
+                    opt.exportTime = 500
+                    break
+                case "Zero2":
+                    opt.exportTime = 1000
+                    break
+                case "Zero":
+                    opt.exportTime = 1500
+                    break
+            }
+        }
 
         switch (this.mode) {
             case "output":
@@ -293,13 +313,36 @@ export class RIO {
         writeFileSync(this.pwmPathChannel + "duty_cycle", (this.dutyMin + ((percent / 100) * (this.dutyMax - this.dutyMin))).toString())
     }
 
+    // -------------------------------------------------------------------
+    // STATIC FUNCTIONS
     /** ------------------------------------------------------------------
-     * @method RIO.closeAll
+     * @function RIO.closeAll
      * @description Static method to close all instances
      */
     static closeAll() {
         for (const [line, instance] of RIO.instances) {
             instance.close()
+        }
+    }
+
+
+    /** ------------------------------------------------------------------
+     * @function RIO.model
+     * @description Return Raspberry Pi model or empty string if not RPi
+     * @return {String}
+     */
+    static model() {
+        try {
+            const model = readFileSync("/proc/device-tree/model", "utf8")
+            if (!model.includes("Raspberry Pi")) return ""
+            if (model.includes("5 Model B")) return "5B"
+            if (model.includes("4 Model B")) return "4B"
+            if (model.includes("3 Model B")) return "3B"
+            if (model.includes("Zero 2")) return "Zero2"
+            if (model.includes("Zero")) return "Zero"
+            return ""
+        } catch (e) {
+            return ""
         }
     }
 }

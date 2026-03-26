@@ -11,7 +11,7 @@ import {RIO, traceCfg, log, sleep, ctrlC, lineNumber} from "../esm/main.mjs"
 
     // Init pwm line and set duty = 0%
     const servo = new RIO(line, "pwm", {
-        exportTime: 100,// delay for export on init
+        exportTime: -1, // delay for export on init
         period: 20000,  // 20,000,000 ns ~ 50 Hz
         dutyMin: 500,   //    500,000 ns ~ 0.5 ms
         dutyMax: 2500   //  2,500,000 ns ~ 2.5 ms

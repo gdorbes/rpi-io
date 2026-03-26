@@ -1,5 +1,12 @@
+2.1.0 - March 26, 2026
+===================
+
+* New default option in *constructor* method: `exporTime: -1` for automatic configuration of `exportTime` depending on device performance.
+* New static method *Rio.model()* to return current RPi model.
+
 2.0.11 - Feb 13, 2026
 ===================
+
 * Minor updates in `README.md`: 
   * Fixes in code examples, where imported class is *RIO*, not *Rio*.
   * Details about Node.js pre-requisites.
