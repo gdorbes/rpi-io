@@ -1,4 +1,4 @@
-# rpi-io API documenation
+# rpi-io API reference
 The **rpi-io** API is based on the class `RIO` with instance methods and a few static functions and utilities
 
 ## RIO class and methods
