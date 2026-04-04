@@ -334,7 +334,7 @@ import {RIO, sleep, ctrlC, } from "rpi-io"
 })()
 ```
 
-### More documentation
+## More documentation
 - [Examples](documentation/examples.md)
 - [API reference guide](documentation/api.md)
 - [Benchmark](documentation/benchmark.md)
