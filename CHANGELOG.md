@@ -1,4 +1,8 @@
 # Changelog
+## [2.1.2] - 2026-06-04
+### Changed
+- License MIT replaced by EUPL
+
 ## [2.1.1] - 2026-03-26
 ### Changed
 - Updated doc organization and content

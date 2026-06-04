@@ -341,5 +341,5 @@ import {RIO, sleep, ctrlC, } from "rpi-io"
 
 ## Licence
 
-MIT
+[EUPL](https://interoperable-europe.ec.europa.eu/collection/eupl)
 
