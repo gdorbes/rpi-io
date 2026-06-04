@@ -1,5 +1,5 @@
 # Changelog
-## [2.1.2] - 2026-06-04
+## [2.1.3] - 2026-06-04
 ### Changed
 - License MIT replaced by EUPL
 
