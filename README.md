@@ -339,7 +339,7 @@ import {RIO, sleep, ctrlC, } from "rpi-io"
 - [API reference guide](documentation/api.md)
 - [Benchmark](documentation/benchmark.md)
 
-## Licence
+## License
 
 [EUPL](https://interoperable-europe.ec.europa.eu/collection/eupl)
 
