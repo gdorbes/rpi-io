@@ -1,7 +1,8 @@
 # Changelog
-## [2.1.3] - 2026-06-04
+## [2.1.5] - 2026-06-05
 ### Changed
 - License MIT replaced by EUPL
+- Announcement as rpisquare.com module
 
 ## [2.1.1] - 2026-03-26
 ### Changed

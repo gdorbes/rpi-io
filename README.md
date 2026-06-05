@@ -1,7 +1,7 @@
 # rpi-io
 ![Static Badge](https://img.shields.io/badge/rpi--io-_2.1.x_-FF5500?style=flat) ![Static Badge](https://img.shields.io/badge/Nodejs-%3E_23-66cc33?logo=nodedotjs&logoColor=white) ![Static Badge](https://img.shields.io/badge/NPM-%3E_10-CC3534?logo=npm&logoColor=white) ![Static Badge](https://img.shields.io/badge/Raspberry_Pi-Zero2_4B_5B-C51A4A?logo=raspberrypi&logoColor=white) ![Static Badge](https://img.shields.io/badge/OS-Bookworm_Trixie-0D7AB9?style=flat)
 
-Current version is 2.1.3. More details in [CHANGELOG.md](CHANGELOG.md).
+Current version is 2.1.5. More details in [CHANGELOG.md](CHANGELOG.md).
 
 **rpi-io** is a lite [ESM](https://nodejs.org/api/esm.html#modules-ecmascript-modules) module for **Node.js** to control **Raspberry Pi** GPIO: access (in, out), input event detection and [PWM](https://en.wikipedia.org/wiki/Pulse-width_modulation) peripheral control.
 
@@ -15,6 +15,7 @@ Current version is 2.1.3. More details in [CHANGELOG.md](CHANGELOG.md).
     - Input/Output - [libgpiod](https://libgpiod.readthedocs.io/en/stable/) v1.6.3 (*Bookworm*) and v2.2.1 (*Trixie*)
     - PWM - [sysfs](https://en.wikipedia.org/wiki/Sysfs) interface.
 
+**rpi-io** is a key module of the solution [rpisquare.com](https://rpisquare.com) to control peripherals of remote Raspberry Pi devices.
 
 ## Prerequisites
 
