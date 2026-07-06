@@ -1,8 +1,10 @@
 # Changelog
-## [2.2.0] - 2026-007-06
+## [2.2.4] - 2026-007-06
 ### Added
 - Static function RIO.lineIsSupported(*line*)
 - Static function RIO.lineIsAvailable(*line*)
+### Changed
+- Fixes in License
 
 ## [2.1.5] - 2026-06-05
 ### Changed

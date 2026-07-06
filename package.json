@@ -1,6 +1,6 @@
 {
   "name": "rpi-io",
-  "version": "2.2.0",
+  "version": "2.2.4",
   "description": "Nodejs module to control Raspberry Pi GPIO",
   "keywords": [
     "raspberry",
@@ -28,7 +28,7 @@
     "type": "git",
     "url": "git+https://github.com/gdorbes/rpi-io.git"
   },
-  "license": "MIT",
+  "license": "EUPL",
   "author": "Guillaume DORBES",
   "engines": {
     "npm": ">=10.0.0",
