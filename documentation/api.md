@@ -186,11 +186,46 @@ RIO.closeAll()
 
 Function to return current model of RPi.
 
+#### Example
+
 ```javascript
 import {RIO} from "rpi-io"
 console.log("model:", RIO.model())
 // Returns '5B', '4B', '3B', 'Zero2', 'Zero' or '' when unknown.
 ```
+
+
+
+### RIO.lineIsSupported(line)
+
+Function to test that RIO supports a GPIO line number
+
+#### Example
+
+```js
+import {RIO} from "rpi-io"
+
+console.log("line  1 is supported:", RIO.lineIsSupported(1)) // displays false
+console.log"line 17 is supported:", RIO.lineIsSupported(17)) // displays true
+```
+
+
+
+### RIO.lineIsAvailable(line)
+
+Function to test that RIO supports a GPIO line number and that is is not yet used
+
+```js
+import {RIO} from "rpi-io"
+
+RIO.closeAll() // Release any open instance
+console.log"line 17 is supported:", RIO.lineIsAvailable(17)) // displays true
+const led = new RIO(17, "output", {value: 0})
+log("line 17 is available:", RIO.lineIsAvailable(17)) // displays false
+RIO.closeAll()
+```
+
+
 
 ## Utilities
 

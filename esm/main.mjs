@@ -14,10 +14,9 @@ export {traceCfg, log, warn, sleep, ctrlC, lineConfig, lineNumber}
 const require = createRequire(import.meta.url)
 const ADDON = require("../build/Release/gpio.node")
 const CHIPNAME = "/dev/gpiochip0"
-const RPi_GPIO_STD = [4, 5, 6, 16, 17, 20, 21, 22, 23, 24, 25, 26, 27]
+const RPi_GPIO_STD = [5, 6, 16, 17, 20, 21, 22, 23, 24, 25, 26, 27]
 const RPi_GPIO_PWM = [12, 13, 18, 19]
 const RPI_GPIO_ALL = [...RPi_GPIO_STD, ...RPi_GPIO_PWM]
-const RPI_CHIP = "gpiochip0"
 const PWM_CHIP = "pwmchip0"
 
 // -------------------------------------------------------------------
@@ -344,6 +343,28 @@ export class RIO {
         } catch (e) {
             return ""
         }
+    }
+
+    /** ------------------------------------------------------------------
+     * @function RIO.lineIsSupported
+     * @description Check that line number is supported by RIO
+     * @param {Number} line
+     * @return {Boolean}
+     */
+    static lineIsSupported(line) {
+        return RPI_GPIO_ALL.indexOf(line) !== -1
+    }
+
+    /** ------------------------------------------------------------------
+     * @function RIO.lineIsAvailable
+     * @description Check that line number is supported and
+     *              not yet used in a RIO instance
+     * @param {Number} line
+     * @return {Boolean}
+     */
+    static lineIsAvailable(line) {
+        if (!RIO.lineIsSupported(line)) return false
+        return !RIO.instances.has(line)
     }
 }
 

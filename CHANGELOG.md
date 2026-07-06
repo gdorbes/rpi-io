@@ -1,4 +1,9 @@
 # Changelog
+## [2.2.0] - 2026-007-06
+### Added
+- Static function RIO.lineIsSupported(*line*)
+- Static function RIO.lineIsAvailable(*line*)
+
 ## [2.1.5] - 2026-06-05
 ### Changed
 - License MIT replaced by EUPL
