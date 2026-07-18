@@ -5,6 +5,8 @@ import {RIO, traceCfg, log, sleep, ctrlC, lineNumber} from "../esm/main.mjs"
 
 (async () => {
     traceCfg(2)
+
+    // Read line number from command line
     const line = lineNumber(2)
     if (line < 0) return
 

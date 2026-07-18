@@ -104,7 +104,7 @@ export class RIO {
                     throw new Error("This line is not setup as PWM (see README)")
 
                 if (opt.period < 0.1 || opt.period > 1000000)
-                    throw new Error("PWM period is out of range (100ns - 1s)")
+                    throw new RangeError("PWM period is out of range (100ns - 1s)")
 
                 // Normalize PWM values in ns
                 this.period = opt.period * 1000
@@ -190,7 +190,7 @@ export class RIO {
             throw new Error("Cannot write to this GPIO mode:", this.mode)
 
         if ([0, 1].indexOf(value) === -1)
-            throw new Error("Value must be either 0 or 1")
+            throw new RangeError("Value must be either 0 or 1")
 
         ADDON.write(this.handle, value)
     }
@@ -306,10 +306,63 @@ export class RIO {
             throw new Error("Duty of PWM line " + this.line + " cannot be updated")
 
         if (percent < 0 || percent > 100 || typeof percent !== "number") {
-            throw new Error("Duty value (%) of PWM line" + this.line + " is not valid")
+            throw new RangeError("Duty value (%) of PWM line" + this.line + " is not valid")
         }
 
         writeFileSync(this.pwmPathChannel + "duty_cycle", (this.dutyMin + ((percent / 100) * (this.dutyMax - this.dutyMin))).toString())
+    }
+
+    /** --------------------------------------------------------------
+     * @method pulseStart
+     * @description Start a train of N pulses on an output GPIO line
+     * @param {Number} count        - Number of pulses
+     * @param {"asc"|"desc"} edge   - ascending/descending edge
+     * @param {Object} opt          - See pulse properties belows
+     * @return {Promise<{elapsedMs: number, pulsesCompleted: number, stopped: boolean}>}
+     */
+    pulseStart(count, edge, opt) {
+
+        const edges = ["desc", "asc"]
+        const defopt = {
+            pulseWidth: 10, // Pulse width in µs
+            spaceWidth: 10, // Space width between pulses in µs
+        }
+        opt = {...defopt, ...opt}
+
+
+        if (this.closed)
+            throw new Error("GPIO handle has been closed")
+
+        if (this.mode !== "output")
+            throw new Error("Cannot write to this GPIO mode:", this.mode)
+
+        if (!Number.isInteger(count) || count <= 0) {
+            throw new RangeError("Count must be a positive integer")
+        }
+
+        if (edges.indexOf(edge) === -1) {
+            throw new RangeError("Invalid edge value")
+        }
+
+        if (!Number.isFinite(opt.pulseWidth) || opt.pulseWidth < 0) {
+            throw new RangeError("pulseWidth must be a non-negative number")
+        }
+        if (!Number.isFinite(opt.spaceWidth) || opt.spaceWidth < 0) {
+            throw new RangeError("spaceWidth must be a non-negative number")
+        }
+
+        return ADDON.pulse(this.handle, count, Math.round(opt.spaceWidth), Math.round(opt.spaceWidth), edge === edges[0] ? 0 : 1)
+    }
+
+    /** --------------------------------------------------------------
+     * @method pulseStop
+     * @description Immediately interrupts an ongoing pulse sequence if one is in progress.
+     *              Synchronous and blocking (a few ms max in practice), the handle remains open and usable afterwards.
+     *              Upon return, the line is guaranteed to be idle—no pulses remain in flight.
+     * @return {Boolean} true if a sequence was in progress and was stopped.
+     */
+    pulseStop() {
+        return ADDON.pulseStop(this.handle)
     }
 
     // -------------------------------------------------------------------

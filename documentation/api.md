@@ -84,6 +84,73 @@ myOuput.write(1)
 
 
 
+### pulseStart(count, edge, opt)
+
+To start a pulse sequence to "output" instance.
+
+#### Example
+
+```js
+import {RIO} from "rpi-io"
+const myOutput = new RIO(17, "output", {value:0})
+
+// Slow pulse x10, ascending edge, w = 0.5 s, s = 0.5 s
+myOutput.pulseStart(10, "asc", {
+        pulseWidth: 500000,
+        spaceWidth: 500000
+    }).then(pulseStatus => {
+        console.log("pulse status stopped when completed:", pulseStatus)
+  		  // { elapsedMs: 9500.113291, pulsesCompleted: 10, stopped: false }
+        myOutput.close()
+    })
+```
+
+#### Parameter(s)
+
+- **count** *{Number}* 
+- **edge** *{"asc'"|'"desc"}* Ascending or descendig edge
+- **options** *{Object}* Pulse options. See default values below
+
+```javascript
+{
+  pulseWidth: 10, // pulse width in µs
+  spaceWidth: 10  // space beween pulses in µs
+}
+```
+
+#### Return 
+
+*{Promise<{`elapsedMs`: number, `pulsesCompleted`: number, `stopped`: boolean}>}*
+
+
+
+### pulseStop()
+
+To stop a pulse sequence on an "output" instance. This function does not return an error is no pulse sequence is active.
+
+#### Example
+
+```js
+import {RIO, sleep} from "rpi-io"
+const myOutput = new RIO(17, "output", {value:1})
+
+// Fast pulse x1000, descending edge, w = 5µs, s = 5µs
+myOutput.pulseStart(1000, "desc", {
+        pulseWidth: 5,
+        spaceWidth: 5
+    }).then(pulseStatus => {
+        console.log("pulse status stopped when completed or stopped:", pulseStatus)
+        // { elapsedMs: 5.283217, pulsesCompleted: 456, stopped: true }
+  		  myOutput.write(0) // Reset line
+        myOutput.close()
+    })
+await sleep(5)
+myOutput.pulseStop() // Stop pulse train after 5ms
+
+```
+
+#### 
+
 ### read()
 
 To read value from "input" instance.

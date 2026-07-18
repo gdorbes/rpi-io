@@ -1,7 +1,7 @@
 # rpi-io
-![Static Badge](https://img.shields.io/badge/rpi--io-_2.2.x_-FF5500?style=flat) ![Static Badge](https://img.shields.io/badge/Nodejs-%3E_23-66cc33?logo=nodedotjs&logoColor=white) ![Static Badge](https://img.shields.io/badge/NPM-%3E_10-CC3534?logo=npm&logoColor=white) ![Static Badge](https://img.shields.io/badge/Raspberry_Pi-Zero2_4B_5B-C51A4A?logo=raspberrypi&logoColor=white) ![Static Badge](https://img.shields.io/badge/OS-Bookworm_Trixie-0D7AB9?style=flat)
+![Static Badge](https://img.shields.io/badge/rpi--io-_3.y.z_-FF5500?style=flat) ![Static Badge](https://img.shields.io/badge/Nodejs-%3E_23-66cc33?logo=nodedotjs&logoColor=white) ![Static Badge](https://img.shields.io/badge/NPM-%3E_10-CC3534?logo=npm&logoColor=white) ![Static Badge](https://img.shields.io/badge/Raspberry_Pi-Zero2_4B_5B-C51A4A?logo=raspberrypi&logoColor=white) ![Static Badge](https://img.shields.io/badge/OS-Bookworm_Trixie-0D7AB9?style=flat)
 
-Current version is 2.2.x Latest update includes new static utility functions. More details in [CHANGELOG.md](CHANGELOG.md).
+Current version is 3.0.0. The latest update introduces pulse sequence management methods for output lines. See [CHANGELOG.md](CHANGELOG.md) and documentation folder.
 
 **rpi-io** is a lite [ESM](https://nodejs.org/api/esm.html#modules-ecmascript-modules) module for **Node.js** to control **Raspberry Pi** GPIO: access (in, out), input event detection and [PWM](https://en.wikipedia.org/wiki/Pulse-width_modulation) peripheral control.
 
@@ -133,7 +133,7 @@ PLEASE NOTE: In all this document, GPIO line numbers are the BCM ones as defined
 
 ### *OUT* operations
 
-#### Example of LED control
+#### Examples of LED control
 ##### Diagram
 ```
 GPIO Pin (Output)
@@ -150,7 +150,7 @@ GPIO Pin (Output)
           ─
 ```
 
-##### Code example
+##### Simple write
 
 ```javascript
 // Import rpi-io module
@@ -167,6 +167,23 @@ setTimeout(()=>{
     led.write(0)
     led.close()
 }, 5000)
+```
+
+Pulse sequence
+
+```js
+import {RIO} from "rpi-io"
+const myOutput = new RIO(17, "output", {value:0})
+
+// Slow pulse x10, ascending edge, w = 0.5 s, s = 0.5 s
+myOutput.pulseStart(10, "asc", {
+        pulseWidth: 500000,
+        spaceWidth: 500000
+    }).then(pulseStatus => {
+        console.log("pulse status stopped when completed:", pulseStatus)
+  		  // { elapsedMs: 9500.113291, pulsesCompleted: 10, stopped: false }
+        myOutput.close()
+    })
 ```
 
 

@@ -1,8 +1,7 @@
 // -------------------------------------------------------------------
-// RPI-IO: - gpio.c v38 - 2025-11-19
-// source: claude.ai/chat/f3139163-e976-47a4-8e46-01fee65686f2
-// -------------------------------------------------------------------
-
+// RPI-IO: - gpio.c v42 - 2026-07-16
+// Private source grd: https://claude.ai/chat/cf72d4ca-335a-410f-8d0d-c18d0c5a9f12
+// ------------------------------------------------------------------
 #include <node_api.h>
 #include <gpiod.h>
 #include <string.h>
@@ -45,12 +44,25 @@ typedef struct {
     pthread_t monitor_thread;
     napi_threadsafe_function tsfn;
     napi_ref callback_ref;
+
+    // Pour pulse() : empêche close()/finalize pendant un train en cours
+    // (opération exécutée dans le thread pool libuv via napi_async_work)
+    volatile int is_pulsing;
+    volatile int stop_requested; // positionné par close()/pulseStop() pour arrêter pulse() en cours
 } gpio_context_t;
+
+// Déclaration anticipée (définie plus loin, avec le reste du code de pulse()) :
+// utilisée par finalize_gpio ci-dessous.
+static int pulse_force_stop_and_wait(gpio_context_t *ctx, long timeout_ms);
 
 // Libérer les ressources GPIO
 static void finalize_gpio(napi_env env, void* finalize_data, void* finalize_hint) {
     gpio_context_t *ctx = (gpio_context_t*)finalize_data;
     if (ctx) {
+        // Si un pulse() tourne encore (handle GC sans close() explicite),
+        // on force son arrêt avant de libérer les ressources sous ses pieds.
+        pulse_force_stop_and_wait(ctx, 500);
+
         // Arrêter le monitoring si actif
         if (ctx->is_monitoring) {
             ctx->is_monitoring = 0;
@@ -745,6 +757,411 @@ static napi_value Read(napi_env env, napi_callback_info info) {
     return result;
 }
 
+// -------------------------------------------------------------------
+// Fonction: pulse(handle, count, widthUs, spacingUs, polarity)
+//
+// Génère un train de N impulsions sur une ligne déjà ouverte en sortie.
+// - count:      nombre d'impulsions
+// - widthUs:    largeur d'impulsion en microsecondes
+// - spacingUs:  espacement entre impulsions en microsecondes
+// - polarity:   1 = impulsion active à l'état HAUT (front montant)
+//               0 = impulsion active à l'état BAS (front descendant)
+//
+// Exécutée en tâche async_work dans le thread pool libuv pour ne pas
+// bloquer la boucle d'événements JS. Résout une Promise avec la durée
+// réelle écoulée (ms).
+// -------------------------------------------------------------------
+
+typedef struct {
+    napi_async_work work;
+    napi_deferred deferred;
+    gpio_context_t *ctx;
+
+    unsigned int count;
+    int64_t width_ns;
+    int64_t spacing_ns;
+    int polarity;      // 1 = actif haut, 0 = actif bas
+
+    double elapsed_ms;
+    unsigned int pulses_completed;
+    int stopped_early;  // 1 si interrompu par close()
+    int error_code;    // 0 = ok, sinon voir pulse_error_message()
+} pulse_work_t;
+
+// Plage acceptée pour widthUs/spacingUs, en microsecondes.
+// Le plafond (1h) est purement une garde-fou pratique : int64_t ne
+// déborde de toute façon pas avant des millénaires en nanosecondes,
+// mais une valeur aussi grande relève très probablement d'une erreur
+// de l'appelant (unité confondue ms/µs, notamment) plutôt qu'un vrai
+// besoin, et monopoliserait un thread du pool libuv inutilement.
+#define PULSE_MAX_US 3600000000LL // 1 heure en µs
+
+static const char* pulse_error_message(int code) {
+    switch (code) {
+        case 1: return "GPIO handle has been closed";
+        case 2: return "GPIO line is not configured as output";
+        case 3: return "Failed to set GPIO value during pulse train";
+        default: return "Unknown error during pulse()";
+    }
+}
+
+// Attente active de haute précision basée sur CLOCK_MONOTONIC.
+// Ne pas utiliser nanosleep()/usleep() ici : leur résolution/latence
+// réelle sur Linux (souvent >50-100µs de jitter) est insuffisante
+// pour des largeurs d'impulsion de quelques microsecondes.
+//
+// Découpée en tranches d'au plus PULSE_STOP_CHECK_NS pour que
+// stop_requested soit détecté rapidement même sur un long espacement,
+// sans quoi close() pourrait devoir attendre toute la durée restante.
+// Retourne 1 si l'attente a été interrompue par une demande d'arrêt.
+#define PULSE_STOP_CHECK_NS 2000000LL // 2 ms
+
+static int pulse_busy_wait_ns(int64_t ns, volatile int *stop_requested) {
+    if (ns <= 0) return 0;
+
+    struct timespec start, now;
+    clock_gettime(CLOCK_MONOTONIC, &start);
+
+    long long remaining_ns = ns;
+
+    while (remaining_ns > 0) {
+        long long slice_ns = remaining_ns < PULSE_STOP_CHECK_NS ? remaining_ns : PULSE_STOP_CHECK_NS;
+
+        // Recalcule la cible de fin de tranche à partir de maintenant
+        clock_gettime(CLOCK_MONOTONIC, &now);
+        long long slice_target_nsec = (long long)now.tv_nsec + slice_ns;
+        time_t slice_target_sec = now.tv_sec + (time_t)(slice_target_nsec / 1000000000LL);
+        slice_target_nsec %= 1000000000LL;
+
+        do {
+            clock_gettime(CLOCK_MONOTONIC, &now);
+        } while (now.tv_sec < slice_target_sec ||
+                 (now.tv_sec == slice_target_sec && now.tv_nsec < slice_target_nsec));
+
+        if (*stop_requested) {
+            return 1;
+        }
+
+        // Temps réellement écoulé depuis le début de l'attente totale
+        long long elapsed_ns = (long long)(now.tv_sec - start.tv_sec) * 1000000000LL +
+                                ((long long)now.tv_nsec - (long long)start.tv_nsec);
+        remaining_ns = ns - elapsed_ns;
+    }
+
+    return 0;
+}
+
+// Positionne la ligne à la valeur donnée. Retourne 0 si ok, <0 sinon.
+// Réutilise directement le handle déjà ouvert par openOutput() -
+// pas de réouverture de chip/ligne, pour une latence minimale.
+static int pulse_set_value(gpio_context_t *ctx, int value) {
+#ifdef LIBGPIOD_V2
+    enum gpiod_line_value gpio_value = value ? GPIOD_LINE_VALUE_ACTIVE : GPIOD_LINE_VALUE_INACTIVE;
+    return gpiod_line_request_set_value(ctx->request, ctx->offset, gpio_value);
+#else
+    return gpiod_line_set_value(ctx->line, value ? 1 : 0);
+#endif
+}
+
+// Demande l'arrêt d'un pulse() en cours et attend (bloquant, thread JS)
+// sa terminaison effective dans le thread du pool libuv, bornée par
+// timeout_ms par sécurité. Ne fait rien si aucun pulse() n'est en cours.
+// Retourne 1 si un train était effectivement en cours et a été arrêté,
+// 0 si rien n'était en cours.
+static int pulse_force_stop_and_wait(gpio_context_t *ctx, long timeout_ms) {
+    if (!ctx->is_pulsing) {
+        return 0;
+    }
+
+    // Vu depuis PulseExecute (thread pool libuv) toutes les 2 ms max
+    // pendant les attentes, et à chaque itération sinon.
+    ctx->stop_requested = 1;
+
+    struct timespec wait_start, now;
+    clock_gettime(CLOCK_MONOTONIC, &wait_start);
+
+    while (ctx->is_pulsing) {
+        usleep(200); // 0.2 ms - relâche le CPU, pas de busy-wait pur ici
+        clock_gettime(CLOCK_MONOTONIC, &now);
+        long elapsed_ms = (now.tv_sec - wait_start.tv_sec) * 1000L +
+                           (now.tv_nsec - wait_start.tv_nsec) / 1000000L;
+        if (elapsed_ms > timeout_ms) {
+            // Ne devrait jamais arriver (vérifications toutes les 2ms max
+            // côté PulseExecute). Filet de sécurité pour ne jamais bloquer
+            // indéfiniment l'appelant.
+            fprintf(stderr,
+                "rpi-io: warning - pulse() stop timed out after %ldms\n",
+                timeout_ms);
+            break;
+        }
+    }
+
+    ctx->stop_requested = 0;
+    return 1;
+}
+
+// Exécuté dans le thread pool libuv - jamais sur le thread JS principal
+static void PulseExecute(napi_env env, void* data) {
+    pulse_work_t *w = (pulse_work_t*)data;
+    gpio_context_t *ctx = w->ctx;
+
+    if (ctx->is_closed) {
+        w->error_code = 1;
+        return;
+    }
+    if (!ctx->is_output) {
+        w->error_code = 2;
+        return;
+    }
+
+    int active_value = w->polarity ? 1 : 0;
+    int idle_value = w->polarity ? 0 : 1;
+
+    struct timespec t0, t1;
+    clock_gettime(CLOCK_MONOTONIC, &t0);
+
+    unsigned int i;
+    for (i = 0; i < w->count; i++) {
+        if (ctx->stop_requested) {
+            w->stopped_early = 1;
+            break;
+        }
+
+        if (pulse_set_value(ctx, active_value) < 0) {
+            w->error_code = 3;
+            break;
+        }
+
+        if (pulse_busy_wait_ns(w->width_ns, &ctx->stop_requested)) {
+            w->stopped_early = 1;
+            // On coupe immédiatement l'impulsion avant de sortir
+            pulse_set_value(ctx, idle_value);
+            break;
+        }
+
+        if (pulse_set_value(ctx, idle_value) < 0) {
+            w->error_code = 3;
+            break;
+        }
+
+        if (i < w->count - 1) {
+            if (pulse_busy_wait_ns(w->spacing_ns, &ctx->stop_requested)) {
+                w->stopped_early = 1;
+                break;
+            }
+        }
+    }
+
+    // Sécurité : quelle que soit la raison de sortie, s'assurer que la
+    // ligne est bien au repos avant de rendre la main.
+    if (w->error_code == 0) {
+        pulse_set_value(ctx, idle_value);
+    }
+
+    w->pulses_completed = i < w->count ? i : w->count;
+
+    clock_gettime(CLOCK_MONOTONIC, &t1);
+    w->elapsed_ms = (double)(t1.tv_sec - t0.tv_sec) * 1000.0 +
+                    (double)(t1.tv_nsec - t0.tv_nsec) / 1e6;
+
+    // IMPORTANT: is_pulsing doit être remis à 0 ICI, dans le thread du
+    // pool libuv, et non dans PulseComplete (qui s'exécute sur le thread
+    // JS principal). close()/pulseStop() bloquent volontairement le
+    // thread JS en attendant is_pulsing == 0 : si ce flag n'était remis
+    // à 0 que par PulseComplete, on aurait un interblocage (le thread JS
+    // bloqué empêcherait sa propre boucle d'événements de déclencher
+    // PulseComplete).
+    ctx->is_pulsing = 0;
+}
+
+// Exécuté de retour sur le thread JS - résout ou rejette la Promise
+static void PulseComplete(napi_env env, napi_status status, void* data) {
+    pulse_work_t *w = (pulse_work_t*)data;
+
+    // Note: ctx->is_pulsing a déjà été remis à 0 par PulseExecute
+    // (voir commentaire à la fin de PulseExecute pour la raison).
+
+    if (status != napi_ok || w->error_code != 0) {
+        napi_value err;
+        const char *msg = (status != napi_ok)
+            ? "Async work failed"
+            : pulse_error_message(w->error_code);
+        napi_create_string_utf8(env, msg, NAPI_AUTO_LENGTH, &err);
+        napi_reject_deferred(env, w->deferred, err);
+    } else {
+        napi_value result, elapsed, completed, stopped;
+        napi_create_object(env, &result);
+        napi_create_double(env, w->elapsed_ms, &elapsed);
+        napi_create_uint32(env, w->pulses_completed, &completed);
+        napi_get_boolean(env, w->stopped_early, &stopped);
+
+        napi_set_named_property(env, result, "elapsedMs", elapsed);
+        napi_set_named_property(env, result, "pulsesCompleted", completed);
+        napi_set_named_property(env, result, "stopped", stopped);
+
+        napi_resolve_deferred(env, w->deferred, result);
+    }
+
+    napi_delete_async_work(env, w->work);
+    free(w);
+}
+
+static napi_value Pulse(napi_env env, napi_callback_info info) {
+    napi_status status;
+    size_t argc = 5;
+    napi_value args[5];
+    gpio_context_t *ctx = NULL;
+    int32_t count, polarity;
+    int64_t width_us, spacing_us;
+
+    status = napi_get_cb_info(env, info, &argc, args, NULL, NULL);
+    if (status != napi_ok || argc < 5) {
+        napi_throw_error(env, NULL,
+            "Expected (handle, count, widthUs, spacingUs, polarity) arguments");
+        return NULL;
+    }
+
+    status = napi_get_value_external(env, args[0], (void**)&ctx);
+    if (status != napi_ok || !ctx) {
+        napi_throw_error(env, NULL, "Invalid GPIO handle");
+        return NULL;
+    }
+
+    if (ctx->is_closed) {
+        napi_throw_error(env, NULL, "GPIO handle has been closed");
+        return NULL;
+    }
+
+    if (!ctx->is_output) {
+        napi_throw_error(env, NULL, "GPIO line is not configured as output");
+        return NULL;
+    }
+
+    if (ctx->is_pulsing) {
+        napi_throw_error(env, NULL, "A pulse() train is already in progress on this handle");
+        return NULL;
+    }
+
+    if (napi_get_value_int32(env, args[1], &count) != napi_ok || count <= 0) {
+        napi_throw_error(env, NULL, "Invalid count: must be a positive integer");
+        return NULL;
+    }
+    if (napi_get_value_int64(env, args[2], &width_us) != napi_ok ||
+        width_us < 0 || width_us > PULSE_MAX_US) {
+        napi_throw_error(env, NULL,
+            "Invalid widthUs: must be an integer in [0, 3600000000] (0 to 1h in microseconds)");
+        return NULL;
+    }
+    if (napi_get_value_int64(env, args[3], &spacing_us) != napi_ok ||
+        spacing_us < 0 || spacing_us > PULSE_MAX_US) {
+        napi_throw_error(env, NULL,
+            "Invalid spacingUs: must be an integer in [0, 3600000000] (0 to 1h in microseconds)");
+        return NULL;
+    }
+    if (napi_get_value_int32(env, args[4], &polarity) != napi_ok) {
+        napi_throw_error(env, NULL, "Invalid polarity: must be 0 or 1");
+        return NULL;
+    }
+
+    pulse_work_t *w = (pulse_work_t*)malloc(sizeof(pulse_work_t));
+    if (!w) {
+        napi_throw_error(env, NULL, "Memory allocation failed");
+        return NULL;
+    }
+    memset(w, 0, sizeof(pulse_work_t));
+
+    w->ctx = ctx;
+    w->count = (unsigned int)count;
+    w->width_ns = width_us * 1000LL;
+    w->spacing_ns = spacing_us * 1000LL;
+    w->polarity = polarity ? 1 : 0;
+
+    napi_value promise;
+    status = napi_create_promise(env, &w->deferred, &promise);
+    if (status != napi_ok) {
+        free(w);
+        napi_throw_error(env, NULL, "Failed to create promise");
+        return NULL;
+    }
+
+    napi_value resource_name;
+    napi_create_string_utf8(env, "GPIOPulse", NAPI_AUTO_LENGTH, &resource_name);
+
+    status = napi_create_async_work(env, NULL, resource_name,
+                                     PulseExecute, PulseComplete, w, &w->work);
+    if (status != napi_ok) {
+        free(w);
+        napi_throw_error(env, NULL, "Failed to create async work");
+        return NULL;
+    }
+
+    ctx->is_pulsing = 1;
+    ctx->stop_requested = 0;
+
+    status = napi_queue_async_work(env, w->work);
+    if (status != napi_ok) {
+        ctx->is_pulsing = 0;
+        napi_delete_async_work(env, w->work);
+        free(w);
+        napi_throw_error(env, NULL, "Failed to queue async work");
+        return NULL;
+    }
+
+    return promise;
+}
+
+// -------------------------------------------------------------------
+// Fonction: pulseStop(handle)
+//
+// Interrompt immédiatement un train d'impulsions en cours sur ce
+// handle, s'il y en a un. Contrairement à close(), le handle reste
+// ouvert et utilisable ensuite (write, read, ou un nouveau pulse()).
+//
+// Cas d'usage typique : butée de fin de course sur un moteur pas à
+// pas - un GPIO d'entrée en interruption (startMonitoring) appelle
+// pulseStop() sur le GPIO de pas pour arrêter net le mouvement.
+//
+// Fonction SYNCHRONE et BLOQUANTE (bornée à ~500ms de sécurité, mais
+// l'arrêt réel prend au maximum quelques millisecondes) : au retour,
+// la ligne est garantie au repos et plus aucune impulsion ne sera
+// émise. C'est volontaire : pour une butée de fin de course, le code
+// appelant a besoin de cette garantie avant de décider de la suite
+// (ex: inverser le sens de rotation) sans risque de course avec une
+// dernière impulsion encore en vol.
+//
+// Retourne un booléen : true si un train était en cours et a été
+// arrêté, false si rien n'était en cours (no-op).
+// -------------------------------------------------------------------
+static napi_value PulseStop(napi_env env, napi_callback_info info) {
+    napi_status status;
+    size_t argc = 1;
+    napi_value args[1];
+    gpio_context_t *ctx = NULL;
+
+    status = napi_get_cb_info(env, info, &argc, args, NULL, NULL);
+    if (status != napi_ok || argc < 1) {
+        napi_throw_error(env, NULL, "Expected handle argument");
+        return NULL;
+    }
+
+    status = napi_get_value_external(env, args[0], (void**)&ctx);
+    if (status != napi_ok || !ctx) {
+        napi_throw_error(env, NULL, "Invalid GPIO handle");
+        return NULL;
+    }
+
+    if (ctx->is_closed) {
+        napi_throw_error(env, NULL, "GPIO handle has been closed");
+        return NULL;
+    }
+
+    int was_stopped = pulse_force_stop_and_wait(ctx, 500);
+
+    napi_value result;
+    napi_get_boolean(env, was_stopped, &result);
+    return result;
+}
+
 // Fonction: close(handle)
 static napi_value Close(napi_env env, napi_callback_info info) {
     napi_status status;
@@ -770,6 +1187,10 @@ static napi_value Close(napi_env env, napi_callback_info info) {
         napi_get_undefined(env, &result);
         return result;
     }
+
+    // Force l'arrêt d'un pulse() en cours et attend sa terminaison réelle
+    // avant de libérer les ressources GPIO sous ses pieds.
+    pulse_force_stop_and_wait(ctx, 500);
 
     // Arrêter le monitoring si actif
     if (ctx->is_monitoring) {
@@ -852,6 +1273,16 @@ static napi_value Init(napi_env env, napi_value exports) {
     status = napi_create_function(env, NULL, 0, Read, NULL, &fn);
     if (status == napi_ok) {
         napi_set_named_property(env, exports, "read", fn);
+    }
+
+    status = napi_create_function(env, NULL, 0, Pulse, NULL, &fn);
+    if (status == napi_ok) {
+        napi_set_named_property(env, exports, "pulse", fn);
+    }
+
+    status = napi_create_function(env, NULL, 0, PulseStop, NULL, &fn);
+    if (status == napi_ok) {
+        napi_set_named_property(env, exports, "pulseStop", fn);
     }
 
     status = napi_create_function(env, NULL, 0, StartMonitoring, NULL, &fn);

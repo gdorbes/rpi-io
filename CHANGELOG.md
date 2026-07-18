@@ -1,8 +1,12 @@
 # Changelog
-## [2.2.4] - 2026-007-06
+## [3.0.0] - 2026-07-18
 ### Added
-- Static function RIO.lineIsSupported(*line*)
-- Static function RIO.lineIsAvailable(*line*)
+- methods **pulseStart**(*count, edge, options*) and **pulseStop**() for output lines
+
+## [2.2.4] - 2026-07-06
+### Added
+- Static function **RIO.lineIsSupported**(*line*)
+- Static function **RIO.lineIsAvailable**(*line*)
 ### Changed
 - Fixes in License
 

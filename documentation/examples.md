@@ -5,6 +5,9 @@ To get familiar with the **rpi-io**, you might have a glance on examples and pla
 # Simple write
 node /your-project/node_modules/rpi-io/test/write.js
 
+# Pulse sequences
+node /your-project/node_modules/rpi-io/test/pulse.js
+
 # Read and monitor
 node /your-project/node_modules/rpi-io/test/read.js
 
