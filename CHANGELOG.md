@@ -4,7 +4,7 @@
 ### Changed
 - log utility refactored
 ### Added
-- extension classes for unipolar and bipolar step motors
+- extension classes for unipolar and bipolar stepper motors
 
 ## [3.0.0] - 2026-07-18
 ### Added
