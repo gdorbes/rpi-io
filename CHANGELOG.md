@@ -1,4 +1,11 @@
 # Changelog
+
+## [3.1.0] - 2026-07-22
+### Changed
+- log utility refactored
+### Added
+- extension classes for unipolar and bipolar step motors
+
 ## [3.0.0] - 2026-07-18
 ### Added
 - methods **pulseStart**(*count, edge, options*) and **pulseStop**() for output lines

@@ -36,7 +36,7 @@ export class StepperBipolar {
      * @param {Object} pul           // rpi-io output instance for pulse pin
      * @param {Object} dir           // rpi-io output instance for direction pin
      * @param {"desc"|"asc"} edge    // pulse active edge: descending or ascending
-     * @param {Number} width         // pulse width in µs between two edges
+     * @param {Number} width         // pulse width and space between two edges in µs
      */
     constructor(pul, dir, edge, width) {
 
@@ -117,7 +117,7 @@ export class StepperBipolar {
 
     /** ------------------------------------------------------------------
      * @method close
-     * @description Disable pul and ir rpi-io instances used for this step motor controller
+     * @description Disable pul and dir rpi-io instances used for this step motor controller
      */
     close() {
         this.ioPulse.close
