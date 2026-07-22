@@ -169,7 +169,7 @@ setTimeout(()=>{
 }, 5000)
 ```
 
-Pulse sequence
+##### Pulse sequence
 
 ```js
 import {RIO} from "rpi-io"

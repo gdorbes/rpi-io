@@ -114,7 +114,7 @@ myOutput.pulseStart(10, "asc", {
 ```javascript
 {
   pulseWidth: 10, // pulse width in µs
-  spaceWidth: 10  // space beween pulses in µs
+  spaceWidth: 10  // space between pulses in µs
 }
 ```
 
@@ -319,7 +319,6 @@ traceCfg(2)
 warn("This is important info") 
 log("This is useful info")
 ```
-
 
 
 ###  sleep(time)

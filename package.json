@@ -1,6 +1,6 @@
 {
   "name": "rpi-io",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "description": "Nodejs module to control Raspberry Pi GPIO",
   "keywords": [
     "raspberry",
@@ -18,7 +18,11 @@
     "bookworm",
     "trixie",
     "iot",
-    "embedded"
+    "embedded",
+    "motor",
+    "stepper",
+    "motor control",
+    "stepper motor"
   ],
   "homepage": "https://github.com/gdorbes/rpi-io#readme",
   "bugs": {
