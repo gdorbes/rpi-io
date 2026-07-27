@@ -15,8 +15,6 @@ Current version is 3.1.0. This version takes advantage of the *pulseStart()* and
     - Input/Output - [libgpiod](https://libgpiod.readthedocs.io/en/stable/) v1.6.3 (*Bookworm*) and v2.2.1 (*Trixie*)
     - PWM - [sysfs](https://en.wikipedia.org/wiki/Sysfs) interface.
 
-**rpi-io** is a key module of the solution [rpisquare.com](https://rpisquare.com) to control peripherals of remote Raspberry Pi devices.
-
 ## Prerequisites
 
 ### libgpiod
