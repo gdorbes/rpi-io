@@ -1,7 +1,7 @@
 # rpi-io
 ![Static Badge](https://img.shields.io/badge/rpi--io-_3.y.z_-FF5500?style=flat) ![Static Badge](https://img.shields.io/badge/Nodejs-%3E_23-66cc33?logo=nodedotjs&logoColor=white) ![Static Badge](https://img.shields.io/badge/NPM-%3E_10-CC3534?logo=npm&logoColor=white) ![Static Badge](https://img.shields.io/badge/Raspberry_Pi-Zero2_4B_5B-C51A4A?logo=raspberrypi&logoColor=white) ![Static Badge](https://img.shields.io/badge/OS-Bookworm_Trixie-0D7AB9?style=flat)
 
-Current version is 3.1.0. This version takes advantage of the *pulseStart()* and *pulseStop()* methods introduced in version 3.0.0 to propose extension classes for stepper motor control. See [extension](https://github.com/gdorbes/rpi-io/tree/master/extensions) and [documentation](https://github.com/gdorbes/rpi-io/tree/master/documentation) folders.
+Current version is 3.1.xxss. This version takes advantage of the *pulseStart()* and *pulseStop()* methods introduced in version 3.0.0 to propose extension classes for stepper motor control. See [extension](https://github.com/gdorbes/rpi-io/tree/master/extensions) and [documentation](https://github.com/gdorbes/rpi-io/tree/master/documentation) folders.
 
 **rpi-io** is a lite [ESM](https://nodejs.org/api/esm.html#modules-ecmascript-modules) module for **Node.js** to control **Raspberry Pi** GPIO: access (in, out), input event detection and [PWM](https://en.wikipedia.org/wiki/Pulse-width_modulation) peripheral control.
 
