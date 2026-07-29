@@ -13,7 +13,7 @@ To facilitate this type of use, since version 3.1 **rpi-io** has included two st
 
 ### Electronic wiring example
 
-![](https://rpisquare.com//img/stepper-unipolar.png)
+![](https://raw.githubusercontent.com/gdorbes/rpi-io/refs/heads/master/img/stepper-unipolar.png)
 
 PLEASE NOTE:
 
@@ -99,7 +99,7 @@ To disable coils and close rpi-io instances.
 
 ### Electronic wiring example
 
-![](https://rpisquare.com//img/stepper-bipolar.png)
+![](https://raw.githubusercontent.com/gdorbes/rpi-io/refs/heads/master/img/stepper-bipolar.png)
 
 PLEASE NOTE:
 
