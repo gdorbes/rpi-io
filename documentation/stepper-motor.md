@@ -1,6 +1,6 @@
 # Stepper Motor Extensions
 
-Using the basic **rpi-io** methods for output  lines (*write*, *pulseStart*, *pulseStop*), it is easy to drive stepper motors, ranging from simple hobbyist motors (e.g., 28BYJ-48) to those designed for robotics and industrial applications, such as the NEMA series (e.g., NEMA 17, 23...) using some hardware driver (e.g. DMA542).
+Using the basic **rpi-io** methods for output  lines (*write*, *pulseStart*, *pulseStop*), it is easy to drive stepper motors, ranging from simple hobbyist motors (e.g. 28BYJ-48) to those designed for robotics and industrial applications, such as the NEMA series (e.g. NEMA 17, 23...) using some hardware driver (e.g. DMA542).
 
 To facilitate this type of use, since version 3.1 **rpi-io** has included two stepper motor controller classes:
 
@@ -21,7 +21,7 @@ PLEASE NOTE:
 
 - **Power source for VCC**: for light loads the Pi's 5V pin can drive the ULN2003/motor directly, but the 28BYJ-48 can draw enough current that it's safer to power VCC from a separate 5V supply, keeping only GND common with the Pi.
 
-- The four GPIO pins (17, 18, 27, 22) are just a common convention — any four free GPIO pins work, as long as your code (e.g. via `RPi.GPIO` or `gpiozero`) references the pins you actually wired.
+- The four GPIO pins (17, 18, 27, 22) are just a common convention — any four free GPIO pins work, as long as your code references the pins you actually wired.
 
 - The ULN2003 board's output side connects to the motor with its keyed 5-pin connector — it only fits one way, so no wiring decisions needed there.
 
@@ -67,11 +67,9 @@ motor28BYJF.close()
 
 - **coilD** *{Object}* **rpi-io** instance for Coil D
 
-- ##### **mode** *{'half','full'}* sequence mode: half step or full step
+- **mode** *{'half','full'}* sequence mode: half step or full step
 
 - **delay** *{Number}* delay in ms between steps
-
-
 
 **Return** *{Object}* StepperUnipolar instance
 
@@ -82,8 +80,8 @@ motor28BYJF.close()
 **Parameter(s)**
 
 - **steps** *{Number}* 
-- **direction** *{'forward'|'backward"'* 
-- **showStep** *{Boolean}* ** to display step in console (default = false)
+- **direction** *{'forward'|'backward'}
+- **showStep** *{Boolean}* to display step in console (default = false)
 
 **Return** *{Promise}* 
 
@@ -107,7 +105,7 @@ PLEASE NOTE:
 
 - **STEP and DIR switch low to trigger**, since GPIO pulls PUL- or DIR- down relative to the shared +5V. 
 
-- **Voltage margin is tight**: the Pi's GPIO output high is 3.3V, but the common rail here is 5V, giving only ~1.7V across the optocoupler when "off" — close to some optocouplers' turn-off threshold. Many builds get away with this, but if you see erratic stepping consider using a Darlington array (e.g. ULN2003) between RPi and DM542.
+- **Voltage margin is tight**: the Pi's GPIO output high is 3.3V, but the common rail here is 5V, giving only ~1.7V across the optocoupler when 'off'. Many builds get away with this, but if you see erratic stepping consider using a Darlington array (e.g. ULN2003) between RPi and DM542.
 
 - **ENA+/ENA-** would follow the same common-anode pattern if you wire it — tied into the same 5V junction, with a GPIO pin driving ENA- low to enable.
 
@@ -161,7 +159,7 @@ bipolar.stop()
 
 - **dir** *{Object}* **rpi-io** instance for direction pin
 
-- ##### **edge** *{'desc','asc'}* pulse active edge: descending or ascending
+- **edge** *{'desc','asc'}* pulse active edge: descending or ascending
 
 - **width** *{Number}* pulse width and space between two edges in µs 
 
@@ -174,8 +172,7 @@ bipolar.stop()
 **Parameter(s)**
 
 - **steps** *{Number}* 
-- **direction** *{'forward'|'backward"'* 
-- **showStep** *{Boolean}* ** to display step in console (default = false)
+- **direction** *{'forward'|'backward'}*
 
 **Return** *{Promise<{elapsedMs: number, pulsesCompleted: number, stopped: boolean}>}* 
 
