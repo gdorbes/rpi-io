@@ -60,6 +60,9 @@ Then log out and log back in.
 
 ````bash
 cd /your-project
+# To allow post-install script to compile C addon
+npm install-scripts approve rpi-io
+# To install module
 npm install rpi-io
 ````
 

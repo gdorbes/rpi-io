@@ -17,7 +17,7 @@ const dir = new RIO(22, "output", {value: 0})
 const bipolar = new StepperBipolar(pul, dir, "desc", 10)
 
 // Start rotating full turn (depending on hardware driver settings)
-bipolar.rotate(25600, "forward").then(stepped => {
+bipolar.rotate(6400, "forward").then(stepped => {
     log("stepped:", stepped)
     // Reset and close lines
     pul.write(0)

@@ -1,5 +1,9 @@
 # Changelog
 
+## [3.1.5] - 2026-11-02
+### Changed
+- README.md: NPM installation script policy
+
 ## [3.1.0] - 2026-07-22
 ### Changed
 - log utility refactored
