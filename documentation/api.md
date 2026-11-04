@@ -16,7 +16,7 @@ const myOutput = new RIO(17, "output")
 - **mode** *{String}* Must be one of the following values: "output", "input", "pwm".
 - **opt** *{Object}* Various options depending on selected mode. See details and default values below.
 
-```javascript
+```json lines
 {
   // For 'output' mode: Initial value {0,1}.
   value: 0,
@@ -28,7 +28,7 @@ const myOutput = new RIO(17, "output")
   // to prevent failure due to device performance.
   //
   // Since v2.1.0 the default value is set to -1, which means auto delay.
-  // It is computed according to device model e.g. 50 ms for 5Pi or 1000 ms RPi Zero.
+  // It is computed according to device model e.g. 50ms for RPi 5 or 1000ms RPi Zero.
   exportTime: -1,
     
   // For 'pwm' mode: Period defined in μs. Default value is equivalent to 50 Hz.
@@ -37,7 +37,9 @@ const myOutput = new RIO(17, "output")
   //  For 'pwm' mode: dutyMin and dutyMax defines the duty cycle use range in µs
   // 		   especially for servo-motors (See their specs!).
   dutyMin: 0,
-  dutyMax: 20000
+  dutyMax: 20000,
+  // enable use of unsupported pin
+  unsupportedPin: false
 }
 ```
 
@@ -108,10 +110,10 @@ myOutput.pulseStart(10, "asc", {
 #### Parameter(s)
 
 - **count** *{Number}* 
-- **edge** *{"asc'"|'"desc"}* Ascending or descendig edge
+- **edge** *{"asc'"|'"desc"}* Ascending or descending edge
 - **options** *{Object}* Pulse options. See default values below
 
-```javascript
+```json lines
 {
   pulseWidth: 10, // pulse width in µs
   spaceWidth: 10  // space between pulses in µs
@@ -273,20 +275,20 @@ Function to test that RIO supports a GPIO line number
 import {RIO} from "rpi-io"
 
 console.log("line  1 is supported:", RIO.lineIsSupported(1)) // displays false
-console.log"line 17 is supported:", RIO.lineIsSupported(17)) // displays true
+console.log("line 17 is supported:", RIO.lineIsSupported(17)) // displays true
 ```
 
 
 
 ### RIO.lineIsAvailable(line)
 
-Function to test that RIO supports a GPIO line number and that is is not yet used
+Function to test that RIO supports a GPIO line number and that is not yet used
 
 ```js
 import {RIO} from "rpi-io"
 
 RIO.closeAll() // Release any open instance
-console.log"line 17 is supported:", RIO.lineIsAvailable(17)) // displays true
+console.log("line 17 is supported:", RIO.lineIsAvailable(17)) // displays true
 const led = new RIO(17, "output", {value: 0})
 log("line 17 is available:", RIO.lineIsAvailable(17)) // displays false
 RIO.closeAll()

@@ -16,8 +16,9 @@ const dir = new RIO(22, "output", {value: 0})
 // Create Bipolar Stepper Motor instance
 const bipolar = new StepperBipolar(pul, dir, "desc", 10)
 
-// Start rotating full turn (depending on hardware driver settings)
-bipolar.rotate(6400, "forward").then(stepped => {
+// Start rotating full turn. Tested with driver DM542
+// Number of steps depends on hardware driver settings
+bipolar.rotate(12800, "forward").then(stepped => {
     log("stepped:", stepped)
     // Reset and close lines
     pul.write(0)

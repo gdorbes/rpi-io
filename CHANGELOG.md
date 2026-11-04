@@ -1,8 +1,12 @@
 # Changelog
 
-## [3.1.5] - 2026-11-02
+## [3.2.0] - 2026-11-04
 ### Changed
-- README.md: NPM installation script policy
+- `README.md`: NPM installation script policy
+- `stepper-motor-bipolar.js`: Detailed comment
+- `main.mjs`: Fix in *pwmDuty()*
+### Added
+- `main.mjs` and `api.md`: new *unsupportedPin* option in constructor
 
 ## [3.1.0] - 2026-07-22
 ### Changed

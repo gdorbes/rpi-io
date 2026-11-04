@@ -47,12 +47,17 @@ export class RIO {
             exportTime: -1,
             period: 20000, // μs ~50Hz
             dutyMin: 0, // μs
-            dutyMax: 20000 // µs
+            dutyMax: 20000, // µs
+            // enable use of unsupported pin
+            unsupportedPin: false
         }
         opt = {...defopt, ...opt}
 
-        if (RPI_GPIO_ALL.indexOf(line) === -1)
+        if (RPI_GPIO_ALL.indexOf(line) === -1 && !opt.unsupportedPin)
             throw new Error("This line is not supported: " + line)
+
+        if (RPI_GPIO_ALL.indexOf(line) === -1 && opt.unsupportedPin)
+            warn("Line number", line, "is not supported; use it at your own risk!")
 
         // line is already defined
         if (RIO.instances.has(line))
@@ -309,7 +314,7 @@ export class RIO {
             throw new RangeError("Duty value (%) of PWM line" + this.line + " is not valid")
         }
 
-        writeFileSync(this.pwmPathChannel + "duty_cycle", (this.dutyMin + ((percent / 100) * (this.dutyMax - this.dutyMin))).toString())
+        writeFileSync(this.pwmPathChannel + "duty_cycle", Math.round(this.dutyMin + ((percent / 100) * (this.dutyMax - this.dutyMin))).toString())
     }
 
     /** --------------------------------------------------------------
