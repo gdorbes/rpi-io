@@ -1,5 +1,10 @@
 # Changelog
 
+
+## [3.3.0] - 2026-11-06
+### Changed
+- `stepper-motor-bipolar.js`: Fix motor direction
+
 ## [3.2.0] - 2026-11-04
 ### Changed
 - `README.md`: NPM installation script policy

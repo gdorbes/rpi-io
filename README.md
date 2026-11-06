@@ -1,7 +1,7 @@
 # rpi-io
 ![Static Badge](https://img.shields.io/badge/rpi--io-_3.y.z_-FF5500?style=flat) ![Static Badge](https://img.shields.io/badge/Nodejs-%3E_23-66cc33?logo=nodedotjs&logoColor=white) ![Static Badge](https://img.shields.io/badge/NPM-%3E_10-CC3534?logo=npm&logoColor=white) ![Static Badge](https://img.shields.io/badge/Raspberry_Pi-Zero2_4B_5B-C51A4A?logo=raspberrypi&logoColor=white) ![Static Badge](https://img.shields.io/badge/OS-Bookworm_Trixie-0D7AB9?style=flat)
 
-Current version is 3.2.x. It includes minor fixes and evolutions.
+Current version is 3.3.x. It includes minor fixes and evolutions.
 
 **rpi-io** is a lite [ESM](https://nodejs.org/api/esm.html#modules-ecmascript-modules) module for **Node.js** to control **Raspberry Pi** GPIO: access (in, out), input event detection and [PWM](https://en.wikipedia.org/wiki/Pulse-width_modulation) peripheral control.
 
@@ -14,6 +14,9 @@ Current version is 3.2.x. It includes minor fixes and evolutions.
 - Middlewares (installed by default with OS distribution):
     - Input/Output - [libgpiod](https://libgpiod.readthedocs.io/en/stable/) v1.6.3 (*Bookworm*) and v2.2.1 (*Trixie*)
     - PWM - [sysfs](https://en.wikipedia.org/wiki/Sysfs) interface.
+
+By default, **rpi-io** only supports pins defined as "General Purpose" on [pinout.xyz](https://pinout.xyz),  namely pins 5, 6, 12, 13, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, and 27.
+
 
 ## Prerequisites
 

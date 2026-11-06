@@ -9,7 +9,7 @@ export {RIO, traceCfg, log, warn, sleep, ctrlC}
  * @class StepperBipolar
  * @description Class definition for Bipolar Stepper motors.
  * Bipolar stepper motors (e.g. NEMA 17 or 23) require hardware driver
- * such as DM542 or equilavent depending on motor power
+ * such as DM542 or equivalent depending on motor power
  */
 export class StepperBipolar {
 
@@ -97,7 +97,7 @@ export class StepperBipolar {
     async rotate(steps, direction) {
 
         // Set direction
-        this.ioDir.write("forward" ? 1 : 0)
+        this.ioDir.write(direction === "forward" ? 1 : 0)
 
         // Start rotation
         log("starting rotation:", steps, "steps", direction)
